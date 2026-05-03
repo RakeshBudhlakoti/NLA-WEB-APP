@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-admin-bg: #F8F9FA;
+  --color-admin-sidebar: #F4EAE1;
+  --color-admin-accent: #EB5757;
+  --color-admin-teal: #61B2A4;
+  --color-admin-text: #2D3748;
+  --color-admin-muted: #718096;
+}
+
+:root {
+  --background: #F8F9FA;
+  --foreground: #2D3748;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.quill-content {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+.quill-content p {
+  margin-bottom: 1.25rem;
+  line-height: 1.6;
+}
+
+.quill-content h1, .quill-content h2, .quill-content h3 {
+  font-weight: bold;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.quill-content ul, .quill-content ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1.25rem;
+  list-style-type: disc;
+}

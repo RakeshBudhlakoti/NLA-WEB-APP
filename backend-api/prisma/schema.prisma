@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String            @id @default(uuid())
+  email               String            @unique
+  username            String?           @unique
+  passwordHash        String?
+  provider            String?
+  role                Role              @default(USER)
+  isVerified          Boolean           @default(false)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  isDeleted           Boolean           @default(false)
+  isActive            Boolean           @default(true)
+  bookmarks           Bookmark[]
+  comments            Comment[]
+  receivedConnections Connection[]      @relation("ReceivedConnections")
+  sentConnections     Connection[]      @relation("SentConnections")
+  likes               Like[]
+  notifications       Notification[]
+  otpVerifications    OtpVerification[]
+  posts               Post[]
+  profile             Profile?
+}
+
+model Connection {
+  id         String   @id @default(uuid())
+  senderId   String?
+  receiverId String
+  name       String
+  email      String
+  reason     String
+  message    String
+  status     String   @default("PENDING")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  receiver   User     @relation("ReceivedConnections", fields: [receiverId], references: [id])
+  sender     User?    @relation("SentConnections", fields: [senderId], references: [id])
+}
+
+model Profile {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  fullName     String
+  avatarUrl    String?
+  coverUrl     String?
+  tagline      String?
+  bio          String?
+  city         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  facebookUrl  String?
+  instagramUrl String?
+  twitterUrl   String?
+  youtubeUrl   String?
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Post {
+  id           String     @id @default(uuid())
+  authorId     String
+  title        String
+  content      String
+  mediaUrl     String?
+  status       PostStatus @default(PENDING)
+  type         String
+  categoryId   String?
+  viewCount    Int        @default(0)
+  isDeleted    Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  rejectReason String?
+  achievement  String?
+  challenge    String?
+  motivation   String?
+  isExclusive  Boolean    @default(false)
+  description  String?
+  editorialHighlights String?
+  bookmarks    Bookmark[]
+  comments     Comment[]
+  likes        Like[]
+  author       User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category     Category?  @relation(fields: [categoryId], references: [id])
+  tags         Tag[]      @relation("PostTags")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  image     String?
+  createdAt DateTime @default(now())
+  posts     Post[]
+}
+
+model Tag {
+  id    String @id @default(uuid())
+  name  String @unique
+  posts Post[] @relation("PostTags")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  postId    String
+  userId    String
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+}
+
+model Bookmark {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      String?
+  data      Json?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  link      String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model OtpVerification {
+  id        String   @id @default(uuid())
+  userId    String?
+  email     String
+  otp       String
+  expiresAt DateTime
+  isUsed    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Setting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  GUEST
+  USER
+  ADMIN
+  ATHLETE
+}
+
+enum PostStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}

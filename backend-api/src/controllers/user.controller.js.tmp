@@ -1,0 +1,83 @@
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+const { sendSuccess, sendError } = require('../utils/response');
+
+const getLeaderboard = async (req, res) => {
+  try {
+    const athletes = await prisma.user.findMany({
+      where: { isDeleted: false, isActive: true },
+      include: {
+        profile: true,
+        posts: {
+          where: { status: 'APPROVED', isDeleted: false },
+          include: {
+            category: true,
+            _count: { select: { likes: true } }
+          }
+        }
+      }
+    });
+
+    let totalPlatformViews = 0;
+    let totalPlatformLikes = 0;
+    let totalPlatformStories = 0;
+    const categoryStats = {};
+
+    const ranked = athletes
+      .map(u => {
+        const posts = u.posts || [];
+        const athleteLikes = posts.reduce((sum, p) => sum + (p._count?.likes || 0), 0);
+        const athleteViews = posts.reduce((sum, p) => sum + (p.viewCount || 0), 0);
+        
+        totalPlatformViews += athleteViews;
+        totalPlatformLikes += athleteLikes;
+        totalPlatformStories += posts.length;
+
+        posts.forEach(p => {
+          if (p.category && p.category.name) {
+            const catName = p.category.name;
+            categoryStats[catName] = (categoryStats[catName] || 0) + (p.viewCount || 0);
+          }
+        });
+
+        const score = (athleteLikes * 5) + athleteViews; // Weighted score
+        return {
+          id: u.id,
+          fullName: u.profile?.fullName || u.email.split('@')[0],
+          avatarUrl: u.profile?.avatarUrl || null,
+          tagline: u.profile?.tagline || 'NLA Athlete',
+          storyCount: posts.length,
+          totalLikes: athleteLikes,
+          totalViews: athleteViews,
+          score
+        };
+      })
+      .filter(u => u.storyCount > 0)
+      .sort((a, b) => b.score - a.score);
+
+    const topCategoryEntry = Object.entries(categoryStats)
+      .sort(([, a], [, b]) => b - a)[0];
+    const topCategory = topCategoryEntry ? topCategoryEntry[0] : 'None';
+
+    const stats = {
+      totalViews: totalPlatformViews,
+      totalLikes: totalPlatformLikes,
+      totalAthletes: ranked.length,
+      topCategory: topCategory,
+      totalStories: totalPlatformStories
+    };
+
+    return sendSuccess(res, 'Leaderboard fetched', { 
+      leaderboard: ranked.slice(0, 50), 
+      stats 
+    });
+  } catch (error) {
+    console.error('Leaderboard Error:', error);
+    return sendError(res, 'Failed to fetch leaderboard', error.message);
+  }
+};
+
+module.exports = {
+  getLeaderboard,
+  // ... other exports should stay
+};

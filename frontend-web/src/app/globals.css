@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-blue: #1877F2;
+  --color-brand-red: #E53238;
+  --color-brand-yellow: #FFCC00;
+  --color-background: #F8F9FA;
+  --color-surface: #FFFFFF;
+  --color-surface-hover: #F3F4F6;
+  --color-foreground: #111827;
+  --color-muted: #6B7280;
+}
+
+:root {
+  --background: #F8F9FA;
+  --foreground: #111827;
+  --surface: #FFFFFF;
+  --surface-hover: #F3F4F6;
+  --muted: #6B7280;
+  --border: #E5E7EB;
+  --card: #FFFFFF;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Outfit', sans-serif;
+}
+
+.quill-content {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+.quill-content p {
+  margin-bottom: 1.5rem;
+  line-height: 1.8;
+}
+
+.quill-content h2, .quill-content h3 {
+  font-weight: bold;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+/* ─── Skeleton Animation ─────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-hover) 25%, var(--border) 50%, var(--surface-hover) 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite linear;
+  border-radius: 0.5rem;
+}
+
+.bg-gradient-insta {
+  background-image: linear-gradient(to right, #F58529, #DD2A7B, #8134AF);
+}
+
+.text-gradient-insta {
+  background-image: linear-gradient(to right, #F58529, #DD2A7B, #8134AF);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
