@@ -1,5 +1,5 @@
-export const API_URL = 'http://localhost:5000/api/v1';
-export const UPLOADS_BASE_URL = 'http://localhost:5000/uploads';
+export const API_URL = 'http://3.137.158.226/api/v1';
+export const UPLOADS_BASE_URL = 'http://3.137.158.226/uploads';
 
 export const UPLOAD_FOLDERS = {
   AVATARS: 'avatars',
@@ -10,8 +10,8 @@ export const UPLOAD_FOLDERS = {
 };
 
 export const getImageUrl = (filename: string | null | undefined, folder: string) => {
-  if (!filename) return null;
-  if (filename.startsWith('http')) return filename; // Fallback for old records
+  if (!filename) return undefined;
+  if (filename && filename.startsWith('http')) return filename; // Fallback for old records
   return `${UPLOADS_BASE_URL}/${folder}/${filename}`;
 };
 

@@ -1,4 +1,6 @@
-const API_BASE_URL = 'http://localhost:5000/api/v1';
+import { API_URL } from './constants';
+
+const API_BASE_URL = API_URL;
 
 export const fetchApi = async (endpoint: string, options: any = {}) => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;

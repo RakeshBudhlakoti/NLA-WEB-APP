@@ -11,12 +11,12 @@ import { useRouter } from "next/navigation";
 
 export default function BookmarksPage() {
   const [bookmarks, setBookmarks] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const { user, status } = useAuth();
+  const [isLoadingBookmarks, setIsLoadingBookmarks] = useState(true);
+  const { user, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!isAuthLoading && !user) {
       router.push("/login");
       return;
     }
@@ -28,12 +28,12 @@ export default function BookmarksPage() {
       } catch (err) {
         console.error("Failed to load bookmarks", err);
       } finally {
-        setIsLoading(false);
+        setIsLoadingBookmarks(false);
       }
     };
 
     if (user) loadBookmarks();
-  }, [user, status, router]);
+  }, [user, isAuthLoading, router]);
 
   const handleBookmarkToggle = (id: string, state: boolean) => {
     if (!state) {
@@ -67,7 +67,7 @@ export default function BookmarksPage() {
           </div>
         </div>
 
-        {isLoading ? (
+        {isLoadingBookmarks ? (
           <SkeletonCardGrid count={4} />
         ) : bookmarks.length === 0 ? (
           <div style={{ background: 'var(--surface)', borderColor: 'var(--border)' }} className="text-center py-32 rounded-3xl border border-dashed">
