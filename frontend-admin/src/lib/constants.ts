@@ -11,7 +11,7 @@ export const UPLOAD_FOLDERS = {
 };
 
 export const getImageUrl = (filename: string | null | undefined, folder: string) => {
-  if (!filename) return null;
+  if (!filename) return undefined;
   if (filename.startsWith('http')) return filename; // Fallback for old records
   return `${UPLOADS_BASE_URL}/${folder}/${filename}`;
 };

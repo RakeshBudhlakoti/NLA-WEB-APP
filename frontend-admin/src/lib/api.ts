@@ -1,8 +1,9 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig, Method } from 'axios';
+import { API_URL } from './constants';
 
 // Create Axios instance
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api/v1',
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -11,7 +12,7 @@ const api = axios.create({
 // Request interceptor to add token
 api.interceptors.request.use((config) => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('nla_access_token') : null;
-  if (token) {
+  if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
@@ -39,7 +40,7 @@ api.interceptors.response.use(
 // Wrapper to standardise API calls
 export const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
   try {
-    const method = options.method || 'GET';
+    const method = (options.method || 'GET') as Method;
     let data = undefined;
 
     if (options.body) {
@@ -54,15 +55,30 @@ export const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
       }
     }
     
-    const response = await api({
+    // Convert RequestInit headers to plain object for Axios
+    const customHeaders: Record<string, string> = {};
+    if (options.headers) {
+      const headers = new Headers(options.headers);
+      headers.forEach((value, key) => {
+        customHeaders[key] = value;
+      });
+    }
+
+    const config: AxiosRequestConfig = {
       url: endpoint,
       method,
       data,
       headers: options.body instanceof FormData 
-        ? { ...options.headers, 'Content-Type': undefined } 
-        : { ...options.headers }
-    });
+        ? { ...customHeaders } 
+        : { ...customHeaders }
+    };
+
+    // Axios handles FormData Content-Type automatically if we don't set it
+    if (options.body instanceof FormData && config.headers) {
+      delete config.headers['Content-Type'];
+    }
     
+    const response = await api(config);
     return response.data;
   } catch (error: any) {
     // Standardize error format for our app
@@ -83,7 +99,7 @@ export async function uploadFileToS3(file: File, folder: string = 'uploads'): Pr
 
     const token = typeof window !== 'undefined' ? localStorage.getItem('nla_access_token') : null;
     // Send folder in query string to ensure it's available to Multer immediately
-    const response = await fetch(`http://localhost:5000/api/v1/upload/file?folder=${folder}`, {
+    const response = await fetch(`${API_URL}/upload/file?folder=${folder}`, {
       method: 'POST',
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),

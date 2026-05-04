@@ -367,7 +367,7 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
                     <div className="aspect-[3/1] w-full rounded-lg bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden relative group">
                       {formData.coverUrl ? (
                         <img 
-                          src={getImageUrl(formData.coverUrl, UPLOAD_FOLDERS.STORIES)} 
+                          src={getImageUrl(formData.coverUrl, UPLOAD_FOLDERS.STORIES) || undefined} 
                           alt="Cover" 
                           className="w-full h-full object-cover" 
                         />

@@ -164,36 +164,6 @@ export default function UsersPage() {
     }
   };
 
-  const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingUser) return;
-    try {
-      const payload: any = { fullName: editForm.fullName, email: editForm.email };
-      if (editForm.password) payload.password = editForm.password;
-
-      if (editingUser.id) {
-        await fetchApi(`/admin/users/${editingUser.id}`, {
-          method: "PUT",
-          body: JSON.stringify(payload)
-        });
-        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'User updated successfully', showConfirmButton: false, timer: 3000 });
-      } else {
-        if (!editForm.password) {
-          Swal.fire('Error', 'Password is required for new users', 'error');
-          return;
-        }
-        await fetchApi(`/admin/users`, {
-          method: "POST",
-          body: JSON.stringify(payload)
-        });
-        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'User created successfully', showConfirmButton: false, timer: 3000 });
-      }
-      setEditingUser(null);
-      loadUsers();
-    } catch (error: any) {
-      Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: error.message || 'Action failed', showConfirmButton: false, timer: 3000 });
-    }
-  };
 
   const toggleSelect = (id: string) => {
     setSelectedUsers(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
