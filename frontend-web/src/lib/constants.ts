@@ -1,5 +1,5 @@
-export const API_URL = 'http://3.137.158.226/api/v1';
-export const UPLOADS_BASE_URL = 'http://3.137.158.226/uploads';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://3.137.158.226/api/v1';
+export const UPLOADS_BASE_URL = process.env.NEXT_PUBLIC_UPLOADS_URL || 'http://3.137.158.226/uploads';
 
 export const UPLOAD_FOLDERS = {
   AVATARS: 'avatars',
