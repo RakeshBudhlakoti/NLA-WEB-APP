@@ -33,6 +33,30 @@ app.get('/', (req, res) => {
   res.json({ success: true, message: 'NLA API is running' });
 });
 
+// 🚀 Public Health Check (No Auth Required)
+app.get('/api/v1/health', async (req, res) => {
+  const { PrismaClient } = require('@prisma/client');
+  const prisma = new PrismaClient();
+  try {
+    // Basic DB check
+    await prisma.$queryRaw`SELECT 1`;
+    res.status(200).json({
+      status: 'UP',
+      timestamp: new Date().toISOString(),
+      database: 'CONNECTED',
+      environment: process.env.NODE_ENV || 'production'
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'DOWN',
+      database: 'DISCONNECTED',
+      error: error.message
+    });
+  } finally {
+    await prisma.$disconnect();
+  }
+});
+
 // Routes (with targeted rate limiting)
 app.use('/api/v1/auth/send-otp', otpLimiter);
 app.use('/api/v1/auth/login', loginLimiter);
