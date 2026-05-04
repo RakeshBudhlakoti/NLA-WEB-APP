@@ -43,7 +43,10 @@ async function main() {
     const c = await prisma.category.upsert({
       where: { name: cat.name },
       update: {},
-      create: cat,
+      create: {
+        name: cat.name,
+        slug: cat.name.toLowerCase().replace(/ /g, '-')
+      },
     });
     categories.push(c);
   }
@@ -80,11 +83,11 @@ async function main() {
         passwordHash,
         role: 'ATHLETE',
         isVerified: true,
-        avatar: a.avatar,
         profile: {
           create: {
             fullName: a.name,
             bio: a.bio,
+            avatarUrl: a.avatar,
             city: 'USA'
           }
         }
@@ -122,11 +125,10 @@ async function main() {
         categoryId: categories[story.catIdx].id,
         tags: { connect: { id: tags[i % tags.length].id } },
         viewCount: Math.floor(Math.random() * 1500) + 200,
-        createdAt: new Date(Date.now() - (i * 24 * 60 * 60 * 1000)) // Spread over 10 days
+        createdAt: new Date(Date.now() - (i * 24 * 60 * 60 * 1000))
       }
     });
 
-    // Add random Likes
     const numLikes = Math.floor(Math.random() * 50) + 10;
     for (let j = 0; j < numLikes; j++) {
       const liker = createdAthletes[Math.floor(Math.random() * 5)];
@@ -135,10 +137,9 @@ async function main() {
           userId: liker.id,
           postId: post.id
         }
-      }).catch(() => { }); // Ignore duplicate likes
+      }).catch(() => { });
     }
 
-    // Add random Comments
     const numComments = Math.floor(Math.random() * 5) + 1;
     for (let j = 0; j < numComments; j++) {
       const commenter = createdAthletes[Math.floor(Math.random() * 5)];
