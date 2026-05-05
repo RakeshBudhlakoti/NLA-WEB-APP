@@ -17,7 +17,7 @@ export default function Home() {
     const loadPosts = async () => {
       try {
         const [recentRes, exclusiveRes] = await Promise.all([
-          fetchApi('/posts?limit=8'),
+          fetchApi('/posts?limit=8&isExclusive=false'),
           fetchApi('/posts?limit=3&isExclusive=true')
         ]);
         setPosts(recentRes.data || []);
