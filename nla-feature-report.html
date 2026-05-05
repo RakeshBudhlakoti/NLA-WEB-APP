@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NLA Sports - Master Feature Specification</title>
+    <style>
+        :root {
+            --bg: #030406;
+            --fan-gradient: linear-gradient(135deg, #3b82f6 0%, #2dd4bf 100%);
+            --athlete-gradient: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            --admin-gradient: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%);
+            --tech-gradient: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+            --card-bg: rgba(255, 255, 255, 0.02);
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #ffffff;
+            --text-dim: #94a3b8;
+        }
+        @media print {
+            body { 
+                background: #030406 !important; 
+                color: white !important; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important;
+            }
+            .card { 
+                background: rgba(255, 255, 255, 0.05) !important; 
+                border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+                -webkit-print-color-adjust: exact !important; 
+            }
+            .no-print { display: none !important; }
+            .hero-bg { display: block !important; }
+            .check, .icon, .line, .badge { -webkit-print-color-adjust: exact !important; }
+        }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            width: 100%;
+            word-wrap: break-word;
+        }
+        .hero-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 90% 90%, rgba(20, 184, 166, 0.1) 0%, transparent 50%);
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 80px 40px; }
+        header { text-align: center; margin-bottom: 100px; }
+        .logo { font-size: 5rem; font-weight: 900; letter-spacing: -0.06em; margin: 0; background: linear-gradient(to bottom, #fff, #444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .badge { display: inline-block; margin-top: 25px; padding: 12px 35px; border-radius: 100px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.25em; font-size: 0.8rem; background: var(--admin-gradient); }
+        
+        .section { margin-bottom: 120px; }
+        .section-header { display: flex; align-items: center; gap: 25px; margin-bottom: 60px; }
+        .section-header h2 { font-size: 3rem; font-weight: 900; margin: 0; letter-spacing: -0.04em; }
+        .section-header .line { height: 6px; flex-grow: 1; border-radius: 20px; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 35px; }
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 40px; padding: 45px; position: relative; }
+        .icon { width: 70px; height: 70px; border-radius: 24px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center; font-size: 2.25rem; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .card h3 { font-size: 1.6rem; font-weight: 800; margin: 0 0 10px 0; }
+        .card .desc { color: var(--accent); font-size: 0.85rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px; display: block; }
+        .card p { color: var(--text-dim); font-size: 1rem; line-height: 1.6; margin-bottom: 25px; }
+        
+        .card ul { padding: 0; margin: 0; list-style: none; }
+        .card li { color: #fff; font-size: 0.9rem; margin-bottom: 12px; display: flex; gap: 12px; align-items: center; font-weight: 500; }
+        .check { width: 20px; height: 20px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; color: white; flex-shrink: 0; }
+
+        /* Color Assignments */
+        .fans h2, .fans .desc { color: #3b82f6; } .fans .line, .fans .icon, .fans .check { background: var(--fan-gradient); }
+        .athletes h2, .athletes .desc { color: #f59e0b; } .athletes .line, .athletes .icon, .athletes .check { background: var(--athlete-gradient); }
+        .admins h2, .admins .desc { color: #14b8a6; } .admins .line, .admins .icon, .admins .check { background: var(--admin-gradient); }
+
+        .no-print { position: fixed; bottom: 40px; right: 40px; padding: 22px 45px; background: var(--tech-gradient); color: white; border: none; border-radius: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; box-shadow: 0 25px 60px rgba(139, 92, 246, 0.5); z-index: 1000; }
+
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            .container { padding: 40px 20px; }
+            .logo { font-size: 3rem; }
+            .section-header h2 { font-size: 1.75rem; }
+            .section-header { gap: 15px; margin-bottom: 30px; }
+            .grid { grid-template-columns: 1fr; gap: 20px; }
+            .card { padding: 30px; border-radius: 24px; }
+            .card h3 { font-size: 1.3rem; }
+            .no-print { 
+                bottom: 20px; right: 20px; left: 20px; 
+                width: calc(100% - 40px); 
+                padding: 15px; font-size: 0.7rem; 
+            }
+            header { margin-bottom: 60px; }
+            [style*="grid-template-columns: repeat(2, 1fr)"] {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero-bg"></div>
+    <button class="no-print" onclick="window.print()">Download Master PDF</button>
+
+    <div class="container">
+        <header>
+            <h1 class="logo">NLA SPORTS</h1>
+            <div class="badge">Master Feature Specification & Roadmap</div>
+        </header>
+
+        <!-- SECTION 1: END USER -->
+        <section class="section fans">
+            <div class="section-header">
+                <h2>👤 Fan Experience</h2>
+                <div class="line"></div>
+            </div>
+            <div class="grid">
+                <div class="card">
+                    <div class="icon">📰</div>
+                    <h3>Story Ecosystem</h3>
+                    <span class="desc">Content Discovery</span>
+                    <p>A centralized hub for high-quality sports narratives, allowing users to dive deep into the journey of their favorite athletes.</p>
+                    <ul>
+                        <li><div class="check">✓</div> Infinite-scroll feed optimization</li>
+                        <li><div class="check">✓</div> Category-specific narratives</li>
+                        <li><div class="check">✓</div> Exclusive vs Public content toggle</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="icon">🏆</div>
+                    <h3>Social Discovery</h3>
+                    <span class="desc">Profiles & Rankings</span>
+                    <p>Engineered for maximum visibility, the platform highlights top talent through data-driven leaderboards and search.</p>
+                    <ul>
+                        <li><div class="check">✓</div> Engagement-based Leaderboard</li>
+                        <li><div class="check">✓</div> Fast, Keyword-optimized Search</li>
+                        <li><div class="check">✓</div> Rich Media Athlete Bio views</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="icon">💬</div>
+                    <h3>User Engagement</h3>
+                    <span class="desc">Interaction Layer</span>
+                    <p>Facilitates a strong community bond through secure, authenticated engagement tools.</p>
+                    <ul>
+                        <li><div class="check">✓</div> Verified Comment Threads</li>
+                        <li><div class="check">✓</div> Instant Post Reactions (Likes)</li>
+                        <li><div class="check">✓</div> Personal Bookmark Collection</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: ATHLETES -->
+        <section class="section athletes">
+            <div class="section-header">
+                <h2>🏃 Athlete Studio</h2>
+                <div class="line"></div>
+            </div>
+            <div class="grid">
+                <div class="card">
+                    <div class="icon">🎨</div>
+                    <h3>Content Creation</h3>
+                    <span class="desc">Story Publishing</span>
+                    <p>A powerful publishing tool allowing athletes to tell their story with professional-grade media support.</p>
+                    <ul>
+                        <li><div class="check">✓</div> Multi-image S3 Upload System</li>
+                        <li><div class="check">✓</div> Draft & Auto-slug Generation</li>
+                        <li><div class="check">✓</div> Content Lifecycle Management</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="icon">🌟</div>
+                    <h3>Personal Branding</h3>
+                    <span class="desc">Profile Identity</span>
+                    <p>Gives athletes full control over their digital identity to attract sponsors and engage fans.</p>
+                    <ul>
+                        <li><div class="check">✓</div> Custom Avatar & Cover Banners</li>
+                        <li><div class="check">✓</div> Integrated Social Link Tree</li>
+                        <li><div class="check">✓</div> Achievement & Tagline showcases</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="icon">📈</div>
+                    <h3>Analytics & Growth</h3>
+                    <span class="desc">Interaction Data</span>
+                    <p>Transparent data to help athletes understand their reach and audience sentiment.</p>
+                    <ul>
+                        <li><div class="check">✓</div> Live Engagement Notifications</li>
+                        <li><div class="check">✓</div> Follower Interaction Dashboard</li>
+                        <li><div class="check">✓</div> Post-level performance tracking</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: ADMIN -->
+        <section class="section admins">
+            <div class="section-header">
+                <h2>🛡️ Administrative Control</h2>
+                <div class="line"></div>
+            </div>
+            <div class="grid">
+                <div class="card">
+                    <div class="icon">⚡</div>
+                    <h3>User Governance</h3>
+                    <span class="desc">Account Control</span>
+                    <p>Total oversight of the user lifecycle, ensuring a safe and verified environment for all members.</p>
+                    <ul>
+                        <li><div class="check">✓</div> Activate / Deactivate / Delete</li>
+                        <li><div class="check">✓</div> Role Promotion (Admin/Athlete)</li>
+                        <li><div class="check">✓</div> Advanced Bulk Batch Processing</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="icon">⚖️</div>
+                    <h3>Moderation Engine</h3>
+                    <span class="desc">Content Quality</span>
+                    <p>Powerful tools to review and refine content before and after it reaches the public.</p>
+                    <ul>
+                        <li><div class="check">✓</div> Story Review & Edit capabilities</li>
+                        <li><div class="check">✓</div> Category & SEO Slug management</li>
+                        <li><div class="check">✓</div> Trash Recovery system</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="icon">🏥</div>
+                    <h3>Infrastructure Health</h3>
+                    <span class="desc">System Diagnostic</span>
+                    <p>Exclusive real-time monitoring of the entire cloud stack for 99.9% uptime reliability.</p>
+                    <ul>
+                        <li><div class="check">✓</div> Live API Health Dashboard</li>
+                        <li><div class="check">✓</div> RDS Database Connectivity stats</li>
+                        <li><div class="check">✓</div> Global Server Latency tracking</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: USER JOURNEYS -->
+        <section class="section" style="margin-top: 100px;">
+            <div class="section-header">
+                <h2 style="background: var(--tech-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">🗺️ Platform User Journeys</h2>
+                <div class="line" style="background: var(--tech-gradient);"></div>
+            </div>
+            
+            <div class="grid">
+                <!-- Fan Flow -->
+                <div class="card" style="border-color: #3b82f6;">
+                    <h3 style="color: #3b82f6;">The Fan Path</h3>
+                    <p>How supporters interact with the platform.</p>
+                    <ul class="flow-list">
+                        <li style="color: #3b82f6; font-weight: 800;">1. DISCOVER</li>
+                        <p style="font-size: 0.85rem; margin-top: -10px; margin-bottom: 15px;">Browse stories and explore the Athlete Leaderboard.</p>
+                        
+                        <li style="color: #3b82f6; font-weight: 800;">2. JOIN</li>
+                        <p style="font-size: 0.85rem; margin-top: -10px; margin-bottom: 15px;">Securely Sign Up or Login to unlock interactive features.</p>
+                        
+                        <li style="color: #3b82f6; font-weight: 800;">3. ENGAGE</li>
+                        <p style="font-size: 0.85rem; margin-top: -10px; margin-bottom: 15px;">Support athletes via Likes, Comments, and Bookmarks.</p>
+                    </ul>
+                </div>
+
+                <!-- Athlete Flow -->
+                <div class="card" style="border-color: #f59e0b;">
+                    <h3 style="color: #f59e0b;">The Athlete Path</h3>
+                    <p>The journey from athlete to storyteller.</p>
+                    <ul class="flow-list">
+                        <li style="color: #f59e0b; font-weight: 800;">1. ONBOARD</li>
+                        <p style="font-size: 0.85rem; margin-top: -10px; margin-bottom: 15px;">Create account and verify identity via secure OTP.</p>
+                        
+                        <li style="color: #f59e0b; font-weight: 800;">2. BRAND</li>
+                        <p style="font-size: 0.85rem; margin-top: -10px; margin-bottom: 15px;">Set up custom profile, social links, and S3 banners.</p>
+                        
+                        <li style="color: #f59e0b; font-weight: 800;">3. PUBLISH</li>
+                        <p style="font-size: 0.85rem; margin-top: -10px; margin-bottom: 15px;">Upload multi-media stories and track fan engagement.</p>
+                    </ul>
+                </div>
+
+                <!-- Admin Flow -->
+                <div class="card" style="border-color: #14b8a6;">
+                    <h3 style="color: #14b8a6;">The Admin Path</h3>
+                    <p>Maintaining the platform integrity.</p>
+                    <ul class="flow-list">
+                        <li style="color: #14b8a6; font-weight: 800;">1. OVERSEE</li>
+                        <p style="font-size: 0.85rem; margin-top: -10px; margin-bottom: 15px;">Login to Dashboard to view platform-wide statistics.</p>
+                        
+                        <li style="color: #14b8a6; font-weight: 800;">2. MODERATE</li>
+                        <p style="font-size: 0.85rem; margin-top: -10px; margin-bottom: 15px;">Review pending stories and manage user permissions.</p>
+                        
+                        <li style="color: #14b8a6; font-weight: 800;">3. MONITOR</li>
+                        <p style="font-size: 0.85rem; margin-top: -10px; margin-bottom: 15px;">Track system health, database health, and server latency.</p>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER: TECH -->
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 50px; padding: 60px; text-align: center;">
+            <h2 style="font-size: 2.5rem; font-weight: 900; margin-bottom: 40px; background: var(--tech-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">TECHNICAL CORE SPECIFICATION</h2>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; text-align: left;">
+                <div style="background: rgba(0,0,0,0.2); padding: 30px; border-radius: 30px;">
+                    <h4 style="color: #8b5cf6; margin: 0 0 10px 0;">SECURITY & AUTH</h4>
+                    <p style="color: var(--text-dim); margin: 0; font-size: 0.9rem;">JWT Stateless tokens, Bcrypt Password Hashing, XSS Sanitization, and Targeted API Rate Limiting.</p>
+                </div>
+                <div style="background: rgba(0,0,0,0.2); padding: 30px; border-radius: 30px;">
+                    <h4 style="color: #ec4899; margin: 0 0 10px 0;">CLOUD INFRASTRUCTURE</h4>
+                    <p style="color: var(--text-dim); margin: 0; font-size: 0.9rem;">AWS EC2 Cluster, RDS PostgreSQL 16, S3 Asset Management, and Vercel Global Edge Proxying.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
