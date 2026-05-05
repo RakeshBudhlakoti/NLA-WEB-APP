@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NLA API Health Tester</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --teal: #14b8a6;
+            --red: #f43f5e;
+            --text: #f8fafc;
+        }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background-color: var(--card);
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            border: 1px border-gray-700;
+        }
+        h1 { font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 800; letter-spacing: -0.025em; }
+        p { color: #94a3b8; font-size: 0.875rem; margin-bottom: 2rem; }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.75rem;
+            margin-bottom: 2rem;
+        }
+        .status-up { background-color: rgba(20, 184, 166, 0.1); color: var(--teal); border: 1px solid rgba(20, 184, 166, 0.2); }
+        .status-down { background-color: rgba(244, 63, 94, 0.1); color: var(--red); border: 1px solid rgba(244, 63, 94, 0.2); }
+        .status-loading { background-color: rgba(148, 163, 184, 0.1); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.2); }
+        
+        .pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: currentColor;
+            box-shadow: 0 0 0 0 currentColor;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(20, 184, 166, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(20, 184, 166, 0); }
+        }
+
+        .details {
+            background: rgba(0,0,0,0.2);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+            text-align: left;
+            white-space: pre-wrap;
+            margin-top: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        button {
+            background-color: var(--teal);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        button:hover { transform: translateY(-1px); filter: brightness(1.1); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>NLA API STATUS</h1>
+        <p>Live health check for your production server</p>
+        
+        <div id="statusBox" class="status-badge status-loading">
+            <div class="pulse"></div>
+            <span id="statusText">Checking...</span>
+        </div>
+
+        <button onclick="checkHealth()">Test Connection Now</button>
+
+        <div id="details" class="details">Press the button to fetch live data...</div>
+    </div>
+
+    <script>
+        const API_URL = 'http://3.137.158.226/api/v1/health';
+        const statusBox = document.getElementById('statusBox');
+        const statusText = document.getElementById('statusText');
+        const details = document.getElementById('details');
+
+        async function checkHealth() {
+            statusBox.className = 'status-badge status-loading';
+            statusText.innerText = 'Connecting...';
+            details.innerText = 'Sending request to ' + API_URL + '...';
+
+            try {
+                const start = Date.now();
+                const response = await fetch(API_URL);
+                const latency = Date.now() - start;
+                const data = await response.json();
+
+                if (response.ok) {
+                    statusBox.className = 'status-badge status-up';
+                    statusText.innerText = 'Online';
+                    details.innerText = JSON.stringify({ ...data, latency: latency + 'ms' }, null, 2);
+                } else {
+                    throw new Error(data.error || 'Server responded with error');
+                }
+            } catch (error) {
+                statusBox.className = 'status-badge status-down';
+                statusText.innerText = 'Offline';
+                details.innerText = 'ERROR: ' + error.message + '\n\nCheck if:\n1. Your EC2 IP is correct\n2. Nginx is running\n3. Port 80/5000 is open in Security Group';
+            }
+        }
+
+        // Auto check on load
+        checkHealth();
+    </script>
+</body>
+</html>
