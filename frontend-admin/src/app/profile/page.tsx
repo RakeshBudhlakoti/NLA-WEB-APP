@@ -151,8 +151,8 @@ export default function ProfilePage() {
       const filename = await uploadFile(file, UPLOAD_FOLDERS.BANNERS);
       setProfile(prev => ({ ...prev, coverUrl: filename }));
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Banner updated successfully', showConfirmButton: false, timer: 3000 });
-    } catch (error) {
-      Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Failed to upload banner', showConfirmButton: false, timer: 3000 });
+    } catch (error: any) {
+      Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: error.message || 'Failed to upload banner', showConfirmButton: false, timer: 3000 });
     } finally {
       setIsUploadingCover(false);
     }

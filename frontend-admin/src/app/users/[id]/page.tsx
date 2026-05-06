@@ -62,7 +62,7 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
 
     setIsUploadingCover(true);
     try {
-      const filename = await uploadFile(file, "stories");
+      const filename = await uploadFile(file, UPLOAD_FOLDERS.BANNERS);
       setFormData(prev => ({ ...prev, coverUrl: filename }));
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Cover image updated', showConfirmButton: false, timer: 2000 });
     } catch (error: any) {
