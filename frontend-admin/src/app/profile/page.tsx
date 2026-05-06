@@ -1,7 +1,7 @@
 "use client";
 
 import AdminLayout from "@/components/AdminLayout";
-import { fetchApi, uploadFileToS3 } from "@/lib/api";
+import { fetchApi, uploadFile } from "@/lib/api";
 import { useEffect, useState, useRef } from "react";
 import Swal from "sweetalert2";
 import { 
@@ -122,7 +122,7 @@ export default function ProfilePage() {
 
     setIsUploading(true);
     try {
-      const filename = await uploadFileToS3(file, UPLOAD_FOLDERS.AVATARS);
+      const filename = await uploadFile(file, UPLOAD_FOLDERS.AVATARS);
       setProfile(prev => ({ ...prev, avatarUrl: filename }));
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Avatar uploaded successfully', showConfirmButton: false, timer: 3000 });
     } catch (error) {
@@ -143,7 +143,7 @@ export default function ProfilePage() {
 
     setIsUploadingCover(true);
     try {
-      const filename = await uploadFileToS3(file, UPLOAD_FOLDERS.BANNERS);
+      const filename = await uploadFile(file, UPLOAD_FOLDERS.BANNERS);
       setProfile(prev => ({ ...prev, coverUrl: filename }));
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Banner updated successfully', showConfirmButton: false, timer: 3000 });
     } catch (error) {
@@ -226,52 +226,61 @@ export default function ProfilePage() {
             
             <div className="space-y-6">
               {/* Banner Upload Section */}
-              <div className="relative group w-full h-40 bg-gray-100 rounded-xl overflow-hidden border-2 border-dashed border-gray-200">
-                {profile.coverUrl ? (
-                  <img 
-                    src={getImageUrl(profile.coverUrl, UPLOAD_FOLDERS.BANNERS) || ""} 
-                    alt="Cover" 
-                    className="w-full h-full object-cover" 
-                  />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
-                    <Save className="w-8 h-8 mb-2 opacity-20" />
-                    <span className="text-xs font-medium uppercase tracking-widest">No Cover Photo</span>
+                <div className="absolute inset-x-0 top-0 h-40 bg-gray-100 rounded-t-xl overflow-hidden border-b border-gray-200 group">
+                  {profile.coverUrl ? (
+                    <img 
+                      src={getImageUrl(profile.coverUrl, UPLOAD_FOLDERS.STORIES) || ""} 
+                      alt="Cover" 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
+                      <Save className="w-8 h-8 mb-2 opacity-20" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">No Banner Set</span>
+                    </div>
+                  )}
+                  
+                  <div className="absolute top-4 right-4 flex gap-2">
+                    <label className="cursor-pointer bg-black/60 backdrop-blur-md text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-admin-teal hover:scale-105 transition-all shadow-xl flex items-center gap-2">
+                      {isUploadingCover ? "Uploading..." : <><Upload className="w-3.5 h-3.5" /> Update Banner</>}
+                      <input type="file" className="hidden" accept="image/*" onChange={handleCoverUpload} />
+                    </label>
                   </div>
-                )}
-                
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-4">
-                  <label className="cursor-pointer bg-white text-black px-4 py-2 rounded-lg text-xs font-bold hover:bg-admin-teal hover:text-white transition-colors flex items-center gap-2">
-                    {isUploadingCover ? "Uploading..." : <><Upload className="w-4 h-4" /> Change Cover</>}
-                    <input type="file" className="hidden" accept="image/*" onChange={handleCoverUpload} />
-                  </label>
                 </div>
-              </div>
 
-              <div className="flex flex-col md:flex-row gap-8 items-start relative z-10 px-6">
-                <div className="flex flex-col items-center gap-3 -mt-12">
-                  <div className="w-32 h-32 rounded-lg bg-white border-4 border-white shadow-lg overflow-hidden group relative">
-                    {profile.avatarUrl ? (
-                      <>
+                <div className="flex flex-col md:flex-row gap-8 items-start relative z-10 px-8 pt-24">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-32 h-32 rounded-3xl bg-white border-4 border-white shadow-2xl overflow-hidden relative group">
+                      {profile.avatarUrl ? (
                         <img 
                           src={getImageUrl(profile.avatarUrl, UPLOAD_FOLDERS.AVATARS) || ""} 
                           alt="Avatar" 
-                          className="w-full h-full object-cover" 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                         />
-                        <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all">
-                           <button onClick={() => fileInputRef.current?.click()} className="text-white text-xs font-bold underline">Change</button>
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50">
+                          <UserIcon className="w-10 h-10 text-gray-200 mb-1" />
+                          <span className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Avatar</span>
                         </div>
-                      </>
-                    ) : (
-                      <div className="text-center p-4 h-full flex flex-col items-center justify-center bg-gray-50">
-                        <UserIcon className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                        <span className="text-[10px] text-gray-400 font-medium">Avatar</span>
-                      </div>
-                    )}
-                    {isUploading && <div className="absolute inset-0 bg-white/80 flex items-center justify-center"><span className="w-5 h-5 border-2 border-admin-teal border-t-transparent rounded-full animate-spin"></span></div>}
+                      )}
+                      {isUploading && (
+                        <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 backdrop-blur-sm">
+                          <span className="w-6 h-6 border-2 border-admin-teal border-t-transparent rounded-full animate-spin"></span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <button 
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()} 
+                      disabled={isUploading}
+                      className="px-5 py-2 bg-white border border-gray-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-600 hover:bg-admin-teal hover:text-white hover:border-admin-teal hover:shadow-lg hover:shadow-admin-teal/20 transition-all flex items-center gap-2 disabled:opacity-50"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      {isUploading ? "Uploading..." : "Change Photo"}
+                    </button>
+                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} />
                   </div>
-                  <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} />
-                </div>
 
                 <div className="flex-1 space-y-4 w-full pt-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

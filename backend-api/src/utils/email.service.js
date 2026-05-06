@@ -1,24 +1,11 @@
+const { SMTP_CONFIG, BRAND_CONFIG } = require('./constants');
 const nodemailer = require('nodemailer');
 
 // ─── SMTP Transporter ──────────────────────────────────────────────────────────
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true, // Use SSL
-  auth: {
-    user: process.env.SMTP_USER || 'rbkstaging@gmail.com',
-    pass: process.env.SMTP_PASS || 'xxkb bcyd iisf bvmy'
-  }
-});
+const transporter = nodemailer.createTransport(SMTP_CONFIG);
 
 // ─── Brand Config ──────────────────────────────────────────────────────────────
-const BRAND = {
-  name: 'NLA Sports',
-  color: '#1d4ed8',
-  accent: '#facc15',
-  logo: 'https://img1.wsimg.com/isteam/ip/8fd845d7-9fa4-4d21-b4c1-c8821f3d534d/Gemini_Generated_Image_3z1rwl3z1rwl3z1r.png',
-  baseUrl: process.env.FRONTEND_URL || 'http://localhost:3000'
-};
+const BRAND = BRAND_CONFIG;
 
 // ─── Base Template Wrapper ─────────────────────────────────────────────────────
 const baseTemplate = (content) => `
@@ -196,7 +183,7 @@ const templates = {
     ['Submitted At', new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })],
   ])}
     ${divider()}
-    ${btnPrimary('Review in Admin Panel', `${BRAND.baseUrl.replace('3000', '3001')}/stories`)}
+    ${btnPrimary('Review in Admin Panel', `${BRAND.adminUrl}/stories`)}
   `),
 
   // 6. Story Approved → Athlete
@@ -243,10 +230,8 @@ const templates = {
 };
 
 // ─── Send Functions ───────────────────────────────────────────────────────────
-const FROM = `"NLA Sports" <${process.env.SMTP_USER || 'rbkstaging@gmail.com'}>`;
-
 const send = async (to, subject, html) => {
-  await transporter.sendMail({ from: FROM, to, subject, html });
+  await transporter.sendMail({ from: BRAND.from, to, subject, html });
   console.log(`[EMAIL] ✅ Sent to ${to}: "${subject}"`);
 };
 

@@ -14,7 +14,29 @@ const app = express();
 app.use(helmet({
   crossOriginResourcePolicy: false,
 }));
-app.use(cors());
+
+// 🛡️ Specific CORS Configuration (Centralized in constants.js)
+const { isProd, ALLOWED_ORIGINS } = require('./src/utils/constants');
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    // In Dev, allow everything from localhost
+    if (!isProd && origin.includes('localhost')) {
+      return callback(null, true);
+    }
+
+    if (ALLOWED_ORIGINS.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.warn(`Blocked by CORS: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(morgan('dev'));

@@ -92,7 +92,12 @@ export const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
   }
 };
 
-export async function uploadFileToS3(file: File, folder: string = 'uploads'): Promise<string> {
+export async function uploadFile(file: File, folder: string = 'uploads'): Promise<string> {
+  // Proactive check for Vercel's payload limit (usually 4.5MB)
+  if (file.size > 4 * 1024 * 1024) {
+    throw new Error('File size exceeds 4MB limit. Please compress your image before uploading.');
+  }
+
   try {
     const formData = new FormData();
     formData.append('file', file);
