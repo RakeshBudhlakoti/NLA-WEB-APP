@@ -105,32 +105,18 @@ export default function Home() {
               ) : exclusivePosts.length === 0 ? (
                 <div className="col-span-3 text-center py-10 text-muted italic">No exclusive content yet.</div>
               ) : (
-                exclusivePosts.map((video) => {
-                  const ytId = getYouTubeId(video.mediaUrl);
-                  const thumb = ytId 
-                    ? `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg` 
-                    : (getImageUrl(video.mediaUrl, UPLOAD_FOLDERS.POSTS) || "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=600&auto=format&fit=crop");
-
-                  return (
-                    <div key={video.id} className="bg-white border border-gray-100 rounded-3xl overflow-hidden group transition-all hover:shadow-2xl h-full flex flex-col">
-                      <Link href={`/stories/${video.id}`} className="block relative h-52 w-full shrink-0 overflow-hidden bg-gray-100">
-                        <img src={thumb} alt={video.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                        <div className="absolute inset-0 flex items-center justify-center z-20">
-                          <div className="w-14 h-14 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg group-hover:bg-brand-red group-hover:text-white transition-all">
-                            <Play className="w-6 h-6 fill-current ml-1" />
-                          </div>
-                        </div>
-                      </Link>
-                      <div className="p-8">
-                        <h3 className="text-2xl font-black leading-tight mb-3 group-hover:text-brand-red transition-colors">
-                          {video.title}
-                        </h3>
-                        <p className="text-gray-500 text-sm line-clamp-2 leading-relaxed">
-                          {stripHtml(video.content)}
-                        </p>
-                      </div>
-                    </div>
-                  );
+                exclusivePosts.map((video, i) => {
+                  const adminVideo = {
+                    ...video,
+                    author: {
+                      id: "admin",
+                      profile: {
+                        fullName: "NLA Administration",
+                        avatarUrl: ""
+                      }
+                    }
+                  };
+                  return <StoryCard key={video.id} post={adminVideo} index={i} />;
                 })
               )}
             </div>
