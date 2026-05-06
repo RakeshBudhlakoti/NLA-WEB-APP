@@ -107,12 +107,19 @@ app.use('/api/v1', (req, res) => {
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  // Deep log for debugging
+  console.error('❌ GLOBAL ERROR:', err.message);
+  console.error('📍 STACK:', err.stack);
+
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Internal Server Error',
     data: null,
-    error: process.env.NODE_ENV === 'development' ? err : null
+    error: process.env.NODE_ENV === 'development' ? {
+      message: err.message,
+      stack: err.stack,
+      status: err.status
+    } : null
   });
 });
 

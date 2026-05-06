@@ -1,7 +1,7 @@
 "use client";
 
 import AdminLayout from "@/components/AdminLayout";
-import { fetchApi } from "@/lib/api";
+import { fetchApi, uploadFile } from "@/lib/api";
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
@@ -45,15 +45,11 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
 
     setIsUploadingAvatar(true);
     try {
-      const uploadData = new FormData();
-      uploadData.append("file", file);
-      const res = await fetchApi("/upload/file?folder=avatars", {
-        method: "POST",
-        body: uploadData,
-      });
-      setFormData(prev => ({ ...prev, avatarUrl: res.data.fileUrl }));
+      const filename = await uploadFile(file, "avatars");
+      setFormData(prev => ({ ...prev, avatarUrl: filename }));
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Avatar updated', showConfirmButton: false, timer: 2000 });
     } catch (error: any) {
+      console.error("Avatar Upload Error:", error);
       Swal.fire({ icon: 'error', title: 'Upload Failed', text: error.message });
     } finally {
       setIsUploadingAvatar(false);
@@ -66,15 +62,11 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
 
     setIsUploadingCover(true);
     try {
-      const uploadData = new FormData();
-      uploadData.append("file", file);
-      const res = await fetchApi("/upload/file?folder=stories", {
-        method: "POST",
-        body: uploadData,
-      });
-      setFormData(prev => ({ ...prev, coverUrl: res.data.fileUrl }));
+      const filename = await uploadFile(file, "stories");
+      setFormData(prev => ({ ...prev, coverUrl: filename }));
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Cover image updated', showConfirmButton: false, timer: 2000 });
     } catch (error: any) {
+      console.error("Cover Upload Error:", error);
       Swal.fire({ icon: 'error', title: 'Upload Failed', text: error.message });
     } finally {
       setIsUploadingCover(false);
@@ -208,6 +200,70 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
         <div className="lg:col-span-2 space-y-8">
+          {/* Media Assets - Hero Design */}
+          <div className="bg-white border border-gray-200 rounded-[2rem] shadow-sm overflow-hidden p-1 pb-6">
+            <div className="relative flex flex-col">
+              {/* Banner Container */}
+              <div className="h-40 md:h-64 w-full bg-gray-900 rounded-t-[1.8rem] rounded-b-[2rem] overflow-hidden relative group shadow-inner">
+                {formData.coverUrl ? (
+                  <img 
+                    src={getImageUrl(formData.coverUrl, UPLOAD_FOLDERS.STORIES) || ""} 
+                    alt="Cover" 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out opacity-80" 
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+                    <Layout className="w-10 h-10 text-white/10 mb-3" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 text-center px-4">Athlete Cover Banner</span>
+                  </div>
+                )}
+                
+                {/* Banner Upload Button */}
+                <div className="absolute top-4 right-4">
+                  <label className="cursor-pointer bg-black/40 backdrop-blur-xl border border-white/20 text-white px-4 py-2 md:px-5 md:py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-admin-teal hover:scale-105 transition-all shadow-xl flex items-center gap-2 group/btn">
+                    {isUploadingCover ? "..." : <><Upload className="w-3 h-3 group-hover/btn:-translate-y-0.5 transition-transform" /> <span className="hidden md:inline">Update Banner</span></>}
+                    <input type="file" className="hidden" accept="image/*" onChange={handleCoverUpload} disabled={isUploadingCover} />
+                  </label>
+                </div>
+
+                {/* Bottom Overlay for Text Contrast */}
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/80 to-transparent"></div>
+              </div>
+
+              {/* Avatar and Name - Negative Margin approach */}
+              <div className="px-6 md:px-10 flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6 -mt-12 md:-mt-16 relative z-10">
+                <div className="relative group">
+                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-[1.5rem] md:rounded-[2rem] border-[4px] border-white overflow-hidden shadow-xl bg-white bg-clip-padding relative z-10 mx-auto md:mx-0">
+                    {formData.avatarUrl ? (
+                      <img 
+                        src={getImageUrl(formData.avatarUrl, UPLOAD_FOLDERS.AVATARS) || ""} 
+                        alt="Avatar" 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" 
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                        <User className="w-8 h-8 md:w-10 md:h-10 text-gray-200" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Avatar Upload Button */}
+                  <div className="absolute -bottom-2 -right-2 z-20">
+                    <label className="cursor-pointer bg-admin-teal text-white w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all border-[3px] border-white group/cam">
+                      <Camera className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover/cam:rotate-12 transition-transform" />
+                      <input type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} disabled={isUploadingAvatar} />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="pb-2 text-center md:text-left mt-2 md:mt-0">
+                  <h3 className="text-xl md:text-2xl font-black text-gray-900 tracking-tight">{formData.fullName || "User Profile"}</h3>
+                  <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-admin-teal mt-1">{formData.role === 'ADMIN' ? 'Administrator' : formData.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Athlete Profile'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Account Basics */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <div className="p-5 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
@@ -316,86 +372,6 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
                      value={formData.bio}
                      onChange={e => setFormData({ ...formData, bio: e.target.value })}
                    />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Media Assets */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-            <div className="p-5 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
-              <Camera className="w-5 h-5 text-admin-teal" />
-              <h2 className="text-lg font-bold text-gray-800">Media Assets</h2>
-            </div>
-            <div className="p-6 space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Avatar Section */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-3">Profile Avatar</label>
-                  <div className="flex items-center gap-4">
-                    <div className="w-20 h-20 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden shrink-0 relative group">
-                      {formData.avatarUrl ? (
-                        <>
-                          <img 
-                            src={getImageUrl(formData.avatarUrl, UPLOAD_FOLDERS.AVATARS)} 
-                            alt="Avatar" 
-                            className="w-full h-full object-cover" 
-                          />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <span className="text-[10px] text-white font-bold uppercase tracking-widest">Preview</span>
-                          </div>
-                        </>
-                      ) : (
-                        <User className="w-8 h-8 text-gray-300" />
-                      )}
-                    </div>
-                    <div className="space-y-3 flex-1 flex flex-col justify-center">
-                      <label className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-admin-teal/5 border border-admin-teal/20 rounded-lg text-[11px] font-black uppercase tracking-widest text-admin-teal cursor-pointer hover:bg-admin-teal hover:text-white transition-all shadow-sm shadow-admin-teal/5 w-fit">
-                        <Upload className="w-3.5 h-3.5" />
-                        {isUploadingAvatar ? "Uploading..." : "Change Avatar"}
-                        <input type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} disabled={isUploadingAvatar} />
-                      </label>
-                      <p className="text-[10px] text-gray-400 font-medium italic">Square images (1:1) work best.</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Cover Image Section */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-3">Cover Banner</label>
-                  <div className="space-y-3">
-                    <div className="aspect-[3/1] w-full rounded-lg bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden relative group">
-                      {formData.coverUrl ? (
-                        <img 
-                          src={getImageUrl(formData.coverUrl, UPLOAD_FOLDERS.STORIES) || undefined} 
-                          alt="Cover" 
-                          className="w-full h-full object-cover" 
-                        />
-                      ) : (
-                        <Layout className="w-8 h-8 text-gray-300" />
-                      )}
-                    </div>
-                    <div className="flex justify-end">
-                      <label className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-full text-[11px] font-black uppercase tracking-widest cursor-pointer hover:bg-black transition-all shadow-lg shadow-black/10">
-                        <Upload className="w-3.5 h-3.5" />
-                        {isUploadingCover ? "Uploading..." : "Update Cover Banner"}
-                        <input type="file" className="hidden" accept="image/*" onChange={handleCoverUpload} disabled={isUploadingCover} />
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="p-4 bg-blue-50/50 rounded-lg border border-blue-100 flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
-                   <Layout className="w-3 h-3 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-blue-800 uppercase tracking-widest">About Cover Images</p>
-                  <p className="text-[11px] text-blue-600 mt-1 leading-relaxed">
-                    The Cover Banner is displayed at the top of the athlete's public profile page. 
-                    It serves as a professional background that showcases their brand. Recommended ratio: 3:1.
-                  </p>
                 </div>
               </div>
             </div>

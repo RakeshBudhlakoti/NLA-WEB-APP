@@ -17,7 +17,10 @@ import {
   MessageSquare as Twitter,
   MapPin,
   Quote,
-  Globe as Facebook
+  Globe as Facebook,
+  Camera,
+  Layout,
+  Shield
 } from "lucide-react";
 import { getImageUrl, UPLOAD_FOLDERS } from "@/lib/constants";
 import { useAuth } from "@/context/AuthContext";
@@ -39,6 +42,7 @@ export default function ProfilePage() {
     instagramUrl: "",
     twitterUrl: "",
     youtubeUrl: "",
+    role: "",
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -72,6 +76,7 @@ export default function ProfilePage() {
           youtubeUrl: res.data.profile?.youtubeUrl || "",
           password: "",
           confirmPassword: "",
+          role: res.data.role || "",
         });
       }
     } catch (error) {
@@ -205,213 +210,318 @@ export default function ProfilePage() {
 
   return (
     <AdminLayout>
-      <div className="mb-6 flex justify-between items-center">
+      {/* Header with Save Button */}
+      <div className="mb-8 flex justify-between items-center bg-white/50 backdrop-blur-sm p-4 rounded-xl border border-white shadow-sm sticky top-0 z-40">
         <div>
-          <h1 className="text-2xl font-medium text-gray-800">Your Profile</h1>
+          <h1 className="text-2xl font-black text-gray-900 tracking-tight">Your Profile</h1>
+          <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mt-1">Manage your identity & security</p>
         </div>
         <button
           onClick={handleSubmit}
           disabled={isSaving}
-          className="px-4 py-2 bg-admin-teal text-white rounded hover:bg-[#4a8f82] transition-all font-medium disabled:opacity-70 text-sm flex items-center gap-2"
+          className="px-6 py-3 bg-gray-900 text-white rounded-xl hover:bg-admin-teal transition-all font-black text-xs uppercase tracking-widest disabled:opacity-70 flex items-center gap-2 shadow-lg shadow-black/10 active:scale-95"
         >
-          {isSaving ? "Saving..." : <><Save className="w-4 h-4" /> Save Profile</>}
+          {isSaving ? "Saving..." : <><Save className="w-4 h-4" /> Save Changes</>}
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12">
-        <div className="lg:col-span-2 space-y-6">
-          {/* General Info */}
-          <div className="bg-white border border-gray-200 rounded shadow-sm p-6">
-            <h2 className="text-lg font-bold text-gray-800 mb-6 border-b border-gray-100 pb-2">Profile Information</h2>
-            
-            <div className="space-y-6">
-              {/* Banner Upload Section */}
-                <div className="absolute inset-x-0 top-0 h-40 bg-gray-100 rounded-t-xl overflow-hidden border-b border-gray-200 group">
-                  {profile.coverUrl ? (
-                    <img 
-                      src={getImageUrl(profile.coverUrl, UPLOAD_FOLDERS.STORIES) || ""} 
-                      alt="Cover" 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
-                      <Save className="w-8 h-8 mb-2 opacity-20" />
-                      <span className="text-[10px] font-black uppercase tracking-widest">No Banner Set</span>
-                    </div>
-                  )}
-                  
-                  <div className="absolute top-4 right-4 flex gap-2">
-                    <label className="cursor-pointer bg-black/60 backdrop-blur-md text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-admin-teal hover:scale-105 transition-all shadow-xl flex items-center gap-2">
-                      {isUploadingCover ? "Uploading..." : <><Upload className="w-3.5 h-3.5" /> Update Banner</>}
-                      <input type="file" className="hidden" accept="image/*" onChange={handleCoverUpload} />
-                    </label>
-                  </div>
-                </div>
-
-                <div className="flex flex-col md:flex-row gap-8 items-start relative z-10 px-8 pt-24">
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="w-32 h-32 rounded-3xl bg-white border-4 border-white shadow-2xl overflow-hidden relative group">
-                      {profile.avatarUrl ? (
-                        <img 
-                          src={getImageUrl(profile.avatarUrl, UPLOAD_FOLDERS.AVATARS) || ""} 
-                          alt="Avatar" 
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                        />
-                      ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50">
-                          <UserIcon className="w-10 h-10 text-gray-200 mb-1" />
-                          <span className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Avatar</span>
-                        </div>
-                      )}
-                      {isUploading && (
-                        <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 backdrop-blur-sm">
-                          <span className="w-6 h-6 border-2 border-admin-teal border-t-transparent rounded-full animate-spin"></span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <button 
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()} 
-                      disabled={isUploading}
-                      className="px-5 py-2 bg-white border border-gray-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-600 hover:bg-admin-teal hover:text-white hover:border-admin-teal hover:shadow-lg hover:shadow-admin-teal/20 transition-all flex items-center gap-2 disabled:opacity-50"
-                    >
-                      <Upload className="w-3.5 h-3.5" />
-                      {isUploading ? "Uploading..." : "Change Photo"}
-                    </button>
-                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} />
-                  </div>
-
-                <div className="flex-1 space-y-4 w-full pt-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1">Username</label>
-                      <input type="text" value={profile.username} readOnly className="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded text-sm text-gray-500 cursor-not-allowed outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1">Full Name</label>
-                      <input type="text" value={profile.fullName} onChange={e => setProfile({ ...profile, fullName: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-admin-teal outline-none" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1">Email Address</label>
-                      <input type="email" value={profile.email} onChange={e => setProfile({ ...profile, email: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-admin-teal outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1">City / Location</label>
-                      <div className="relative">
-                        <MapPin className="absolute left-2.5 top-2.5 w-4 h-4 text-gray-400" />
-                        <input type="text" value={profile.city} onChange={e => setProfile({ ...profile, city: e.target.value })} placeholder="New York, USA" className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-admin-teal outline-none" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+      <div className="space-y-8 pb-20">
+        {/* Profile Hero Section */}
+        <div className="relative flex flex-col">
+          {/* Banner Container */}
+          <div className="h-48 md:h-80 w-full bg-gray-900 rounded-[2rem] overflow-hidden relative group shadow-2xl border-4 border-white">
+            {profile.coverUrl ? (
+              <img 
+                src={getImageUrl(profile.coverUrl, UPLOAD_FOLDERS.STORIES) || ""} 
+                alt="Cover" 
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-out opacity-80" 
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+                <Layout className="w-12 h-12 text-white/10 mb-4" />
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 text-center px-4">Official NLA Banner</span>
               </div>
+            )}
+            
+            {/* Banner Upload Button */}
+            <div className="absolute top-4 right-4 md:top-6 md:right-6">
+              <label className="cursor-pointer bg-black/40 backdrop-blur-xl border border-white/20 text-white px-4 py-2 md:px-5 md:py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-admin-teal hover:scale-105 transition-all shadow-2xl flex items-center gap-2 group/btn">
+                {isUploadingCover ? "..." : <><Upload className="w-3 h-3 md:w-3.5 md:h-3.5 group-hover/btn:-translate-y-0.5 transition-transform" /> <span className="hidden md:inline">Update Banner</span></>}
+                <input type="file" className="hidden" accept="image/*" onChange={handleCoverUpload} />
+              </label>
             </div>
+
+            {/* Bottom Overlay for Text Contrast */}
+            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 to-transparent"></div>
           </div>
 
-          {/* Bio & Tagline */}
-          <div className="bg-white border border-gray-200 rounded shadow-sm p-6">
-             <h2 className="text-lg font-bold text-gray-800 mb-6 border-b border-gray-100 pb-2">Professional Bio</h2>
-             <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1">Tagline</label>
-                  <div className="relative">
-                    <Quote className="absolute left-2.5 top-2.5 w-4 h-4 text-gray-400" />
-                    <input type="text" value={profile.tagline} onChange={e => setProfile({ ...profile, tagline: e.target.value })} placeholder="Senior Editor at NLA Sports" className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-admin-teal outline-none" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1">Biography</label>
-                  <textarea rows={4} value={profile.bio} onChange={e => setProfile({ ...profile, bio: e.target.value })} placeholder="Tell us about yourself..." className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-admin-teal outline-none resize-none" />
-                </div>
-             </div>
-          </div>
-
-          {/* Security */}
-          <div className="bg-white border border-gray-200 rounded shadow-sm p-6">
-            <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-2">
-              <h2 className="text-lg font-bold text-gray-800">Security</h2>
-              <button type="button" onClick={generatePassword} className="text-xs text-admin-teal font-bold hover:underline">Generate Strong Password</button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-bold text-gray-700 mb-1">New Password</label>
-                <div className="relative">
-                  <input type={showPassword ? "text" : "password"} placeholder="Leave blank to keep current" value={profile.password} onChange={e => setProfile({ ...profile, password: e.target.value })} className="w-full px-3 py-2 pr-16 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-admin-teal outline-none" />
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                    {profile.password && (
-                      <button type="button" onClick={() => copyToClipboard(profile.password)} className="p-1 text-gray-400 hover:text-admin-teal transition-colors">{copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}</button>
-                    )}
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="p-1 text-gray-400 hover:text-admin-teal transition-colors">{showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}</button>
-                  </div>
-                </div>
-                {profile.password && (
-                  <div className="mt-2">
-                    <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden"><div className={`h-full transition-all duration-300 ${strengthColor}`} style={{ width: `${(strength / 4) * 100}%` }} /></div>
-                    <span className="text-[10px] text-gray-500 font-bold uppercase mt-1 block">Strength: {strengthText}</span>
+          {/* Avatar and Name - Negative Margin approach */}
+          <div className="px-6 md:px-12 flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-8 -mt-16 md:-mt-20 relative z-10">
+            <div className="relative group">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-[2rem] md:rounded-[2.5rem] border-[4px] md:border-[6px] border-white overflow-hidden shadow-2xl bg-white bg-clip-padding relative z-10 mx-auto md:mx-0">
+                {profile.avatarUrl ? (
+                  <img 
+                    src={getImageUrl(profile.avatarUrl, UPLOAD_FOLDERS.AVATARS) || ""} 
+                    alt="Avatar" 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" 
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                    <UserIcon className="w-10 h-10 md:w-12 md:h-12 text-gray-200" />
                   </div>
                 )}
               </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Confirm New Password</label>
-                <div className="relative">
-                  <input type={showConfirmPassword ? "text" : "password"} placeholder="Repeat new password" value={profile.confirmPassword} onChange={e => setProfile({ ...profile, confirmPassword: e.target.value })} className="w-full px-3 py-2 pr-10 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-admin-teal outline-none" />
-                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-admin-teal transition-colors">{showConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}</button>
-                </div>
+
+              {/* Avatar Upload Button */}
+              <div className="absolute -bottom-2 -right-2 md:-right-2 z-20">
+                <label className="cursor-pointer bg-admin-teal text-white w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all border-[3px] md:border-4 border-white group/cam">
+                  <Camera className="w-4 h-4 md:w-5 md:h-5 group-hover/cam:rotate-12 transition-transform" />
+                  <input type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} />
+                </label>
               </div>
+            </div>
+
+            <div className="pb-2 md:pb-4 text-center md:text-left mt-4 md:mt-0">
+              <h2 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">{profile.fullName || "Your Name"}</h2>
+              <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-admin-teal mt-1">NLA {profile.role || "Administrator"}</p>
             </div>
           </div>
         </div>
 
-        <div className="space-y-6">
-          {/* Social Links */}
-          <div className="bg-white border border-gray-200 rounded shadow-sm p-6">
-             <h2 className="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Social Profiles</h2>
-             <div className="space-y-4">
-                <div className="space-y-1">
-                   <label className="text-xs font-bold text-gray-500 uppercase">Facebook</label>
-                   <div className="relative flex items-center">
-                      <Facebook className="absolute left-2.5 w-4 h-4 text-[#1877F2]" />
-                      <input type="url" value={profile.facebookUrl} onChange={e => setProfile({ ...profile, facebookUrl: e.target.value })} placeholder="https://facebook.com/..." className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-admin-teal outline-none" />
-                   </div>
+        {/* Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8 md:mt-12">
+          
+          {/* Main Info Columns */}
+          <div className="lg:col-span-2 space-y-8">
+            
+            {/* Account Details */}
+            <div className="bg-white rounded-3xl p-10 shadow-sm border border-gray-100 hover:shadow-xl hover:shadow-black/[0.02] transition-all">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-8 h-8 bg-admin-teal/10 rounded-lg flex items-center justify-center">
+                  <UserIcon className="w-4 h-4 text-admin-teal" />
                 </div>
-                <div className="space-y-1">
-                   <label className="text-xs font-bold text-gray-500 uppercase">Instagram</label>
-                   <div className="relative flex items-center">
-                      <Instagram className="absolute left-2.5 w-4 h-4 text-[#E4405F]" />
-                      <input type="url" value={profile.instagramUrl} onChange={e => setProfile({ ...profile, instagramUrl: e.target.value })} placeholder="https://instagram.com/..." className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-admin-teal outline-none" />
-                   </div>
+                <h3 className="text-lg font-black text-gray-900 tracking-tight">Account Information</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Username</label>
+                  <input
+                    type="text"
+                    value={profile.username}
+                    readOnly
+                    className="w-full px-5 py-3.5 bg-gray-50 border-none rounded-xl text-gray-500 font-bold text-sm cursor-not-allowed"
+                  />
                 </div>
-                <div className="space-y-1">
-                   <label className="text-xs font-bold text-gray-500 uppercase">Twitter / X</label>
-                   <div className="relative flex items-center">
-                      <Twitter className="absolute left-2.5 w-4 h-4 text-[#1DA1F2]" />
-                      <input type="url" value={profile.twitterUrl} onChange={e => setProfile({ ...profile, twitterUrl: e.target.value })} placeholder="https://twitter.com/..." className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-admin-teal outline-none" />
-                   </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Full Name</label>
+                  <input
+                    type="text"
+                    value={profile.fullName}
+                    onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
+                    className="w-full px-5 py-3.5 bg-gray-50 border border-transparent focus:border-admin-teal focus:bg-white rounded-xl text-gray-900 font-bold text-sm transition-all"
+                  />
                 </div>
-                <div className="space-y-1">
-                   <label className="text-xs font-bold text-gray-500 uppercase">YouTube</label>
-                   <div className="relative flex items-center">
-                      <Youtube className="absolute left-2.5 w-4 h-4 text-[#FF0000]" />
-                      <input type="url" value={profile.youtubeUrl} onChange={e => setProfile({ ...profile, youtubeUrl: e.target.value })} placeholder="https://youtube.com/..." className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-admin-teal outline-none" />
-                   </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Email Address</label>
+                  <input
+                    type="email"
+                    value={profile.email}
+                    onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                    className="w-full px-5 py-3.5 bg-gray-50 border border-transparent focus:border-admin-teal focus:bg-white rounded-xl text-gray-900 font-bold text-sm transition-all"
+                  />
                 </div>
-             </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">City / Location</label>
+                  <div className="relative">
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="e.g. Los Angeles, CA"
+                      value={profile.city}
+                      onChange={(e) => setProfile({ ...profile, city: e.target.value })}
+                      className="w-full pl-12 pr-5 py-3.5 bg-gray-50 border border-transparent focus:border-admin-teal focus:bg-white rounded-xl text-gray-900 font-bold text-sm transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Professional Bio */}
+            <div className="bg-white rounded-3xl p-10 shadow-sm border border-gray-100 hover:shadow-xl hover:shadow-black/[0.02] transition-all">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
+                  <Quote className="w-4 h-4 text-purple-500" />
+                </div>
+                <h3 className="text-lg font-black text-gray-900 tracking-tight">Professional Identity</h3>
+              </div>
+              
+              <div className="space-y-8">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Tagline / Mission</label>
+                  <input
+                    type="text"
+                    placeholder="Briefly describe your focus..."
+                    value={profile.tagline}
+                    onChange={(e) => setProfile({ ...profile, tagline: e.target.value })}
+                    className="w-full px-5 py-3.5 bg-gray-50 border border-transparent focus:border-purple-500 focus:bg-white rounded-xl text-gray-900 font-bold text-sm transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Biography</label>
+                  <textarea
+                    rows={5}
+                    placeholder="Tell us about your background and goals..."
+                    value={profile.bio}
+                    onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                    className="w-full px-5 py-4 bg-gray-50 border border-transparent focus:border-purple-500 focus:bg-white rounded-2xl text-gray-900 font-bold text-sm transition-all resize-none"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            {/* Security Section */}
+            <div className="bg-white rounded-3xl p-10 shadow-sm border border-gray-100 hover:shadow-xl hover:shadow-black/[0.02] transition-all">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center">
+                    <Check className="w-4 h-4 text-red-500" />
+                  </div>
+                  <h3 className="text-lg font-black text-gray-900 tracking-tight">Security</h3>
+                </div>
+                <button 
+                  type="button" 
+                  className="text-[10px] font-black uppercase tracking-widest text-admin-teal hover:underline"
+                  onClick={() => {
+                    const pass = Math.random().toString(36).slice(-10) + "A1!";
+                    setProfile({ ...profile, password: pass, confirmPassword: pass });
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Strong password generated', text: pass, showConfirmButton: true });
+                  }}
+                >
+                  Generate Strong Password
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2 relative">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">New Password</label>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Leave blank to keep current"
+                    value={profile.password}
+                    onChange={(e) => setProfile({ ...profile, password: e.target.value })}
+                    className="w-full px-5 py-3.5 bg-gray-50 border border-transparent focus:border-red-500 focus:bg-white rounded-xl text-gray-900 font-bold text-sm transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-[3.2rem] text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Confirm New Password</label>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Repeat new password"
+                    value={profile.confirmPassword}
+                    onChange={(e) => setProfile({ ...profile, confirmPassword: e.target.value })}
+                    className="w-full px-5 py-3.5 bg-gray-50 border border-transparent focus:border-red-500 focus:bg-white rounded-xl text-gray-900 font-bold text-sm transition-all"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="bg-white border border-gray-200 rounded shadow-sm p-6">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">Account Summary</h2>
-            <div className="space-y-4">
-               <div className="flex justify-between text-sm py-2 border-b border-gray-50">
-                  <span className="text-gray-500">Role</span>
-                  <span className="font-bold text-admin-teal">Administrator</span>
-               </div>
-               <div className="flex justify-between text-sm py-2 border-b border-gray-50">
-                  <span className="text-gray-500">Status</span>
-                  <span className="text-green-600 font-bold">Active</span>
-               </div>
+          {/* Sidebar Columns */}
+          <div className="space-y-8">
+            {/* Social Profiles */}
+            <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+              <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-6">Social Network</h3>
+              
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Facebook className="w-3 h-3 text-blue-600" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Facebook</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={profile.facebookUrl}
+                    onChange={(e) => setProfile({ ...profile, facebookUrl: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-transparent focus:border-blue-600 focus:bg-white rounded-xl text-xs font-bold transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Instagram className="w-3 h-3 text-pink-600" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Instagram</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={profile.instagramUrl}
+                    onChange={(e) => setProfile({ ...profile, instagramUrl: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-transparent focus:border-pink-600 focus:bg-white rounded-xl text-xs font-bold transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Twitter className="w-3 h-3 text-sky-500" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Twitter / X</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={profile.twitterUrl}
+                    onChange={(e) => setProfile({ ...profile, twitterUrl: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-transparent focus:border-sky-500 focus:bg-white rounded-xl text-xs font-bold transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Youtube className="w-3 h-3 text-red-600" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Youtube</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={profile.youtubeUrl}
+                    onChange={(e) => setProfile({ ...profile, youtubeUrl: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-transparent focus:border-red-600 focus:bg-white rounded-xl text-xs font-bold transition-all"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Account Summary Card */}
+            <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700"></div>
+              
+              <h3 className="text-xs font-black uppercase tracking-widest text-white/40 mb-8">Account Summary</h3>
+              
+              <div className="space-y-6 relative z-10">
+                <div className="flex justify-between items-center border-b border-white/5 pb-4">
+                  <span className="text-xs font-bold text-white/60">System Role</span>
+                  <span className="text-xs font-black uppercase tracking-widest text-admin-teal">Administrator</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-white/5 pb-4">
+                  <span className="text-xs font-bold text-white/60">Account Status</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></div>
+                    <span className="text-xs font-black uppercase tracking-widest text-green-400">Active</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center pt-2">
+                  <span className="text-xs font-bold text-white/60">Last Login</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Today, 10:45 AM</span>
+                </div>
+              </div>
+
+              <div className="mt-10 pt-6 border-t border-white/10 flex items-center justify-between">
+                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-admin-teal" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Secured by NLA</span>
+              </div>
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import AdminLayout from "@/components/AdminLayout";
-import { fetchApi, uploadFileToS3 } from "@/lib/api";
+import { fetchApi, uploadFile } from "@/lib/api";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Edit2, Trash2, X, Upload, Search, Link as LinkIcon, Image as ImageIcon } from "lucide-react";
@@ -59,7 +59,7 @@ export default function CategoriesPage() {
 
     setIsUploading(true);
     try {
-      const filename = await uploadFileToS3(file, UPLOAD_FOLDERS.CATEGORIES);
+      const filename = await uploadFile(file, UPLOAD_FOLDERS.CATEGORIES);
       setFormData(prev => ({ ...prev, image: filename }));
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Image uploaded', showConfirmButton: false, timer: 3000 });
     } catch (err: any) {

@@ -1,7 +1,7 @@
 "use client";
 
 import AdminLayout from "@/components/AdminLayout";
-import { fetchApi, uploadFileToS3 } from "@/lib/api";
+import { fetchApi, uploadFile } from "@/lib/api";
 import { useEffect, useState, useRef } from "react";
 import Swal from "sweetalert2";
 import { Save, Upload } from "lucide-react";
@@ -57,7 +57,7 @@ export default function SettingsPage() {
 
     setIsUploading(true);
     try {
-      const filename = await uploadFileToS3(file, UPLOAD_FOLDERS.LOGOS);
+      const filename = await uploadFile(file, UPLOAD_FOLDERS.LOGOS);
       setSettings(prev => ({ ...prev, logoUrl: filename }));
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Logo uploaded successfully', showConfirmButton: false, timer: 3000 });
     } catch (error) {

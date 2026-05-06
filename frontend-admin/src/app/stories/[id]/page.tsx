@@ -1,7 +1,7 @@
 "use client";
 
 import AdminLayout from "@/components/AdminLayout";
-import { fetchApi, uploadFileToS3 } from "@/lib/api";
+import { fetchApi, uploadFile } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Swal from "sweetalert2";
@@ -96,7 +96,7 @@ export default function StoryReviewPage() {
 
     setIsUploading(true);
     try {
-      const filename = await uploadFileToS3(file, UPLOAD_FOLDERS.POSTS);
+      const filename = await uploadFile(file, UPLOAD_FOLDERS.STORIES);
       setEditForm(prev => ({ ...prev, mediaUrl: filename }));
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Media uploaded successfully', showConfirmButton: false, timer: 3000 });
     } catch (err: any) {

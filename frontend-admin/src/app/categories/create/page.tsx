@@ -1,7 +1,7 @@
 "use client";
 
 import AdminLayout from "@/components/AdminLayout";
-import { fetchApi, uploadFileToS3 } from "@/lib/api";
+import { fetchApi, uploadFile } from "@/lib/api";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { 
@@ -35,7 +35,7 @@ export default function CreateCategoryPage() {
 
     setIsUploading(true);
     try {
-      const filename = await uploadFileToS3(file, UPLOAD_FOLDERS.CATEGORIES);
+      const filename = await uploadFile(file, UPLOAD_FOLDERS.CATEGORIES);
       setFormData(prev => ({ ...prev, image: filename }));
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Image uploaded', showConfirmButton: false, timer: 3000 });
     } catch (err: any) {
