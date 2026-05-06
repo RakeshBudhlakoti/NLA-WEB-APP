@@ -95,7 +95,7 @@ export default function EditProfile() {
     if (!file) return;
     setIsUploadingCover(true);
     try {
-      const filename = await uploadFileToS3(file, UPLOAD_FOLDERS.STORIES);
+      const filename = await uploadFileToS3(file, UPLOAD_FOLDERS.BANNERS);
       setCoverUrl(filename);
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Cover image updated!', showConfirmButton: false, timer: 3000 });
     } catch (err: any) {
@@ -169,7 +169,7 @@ export default function EditProfile() {
             <div className="relative group h-48 md:h-64 bg-gray-100">
               {coverUrl ? (
                 <img 
-                  src={getImageUrl(coverUrl, UPLOAD_FOLDERS.STORIES)} 
+                  src={getImageUrl(coverUrl, UPLOAD_FOLDERS.BANNERS)} 
                   alt="Cover" 
                   className="w-full h-full object-cover" 
                 />

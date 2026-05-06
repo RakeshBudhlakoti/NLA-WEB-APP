@@ -42,6 +42,7 @@ export default function StoryReviewPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [categories, setCategories] = useState<any[]>([]);
   const [editForm, setEditForm] = useState({ 
     title: "", 
@@ -95,14 +96,16 @@ export default function StoryReviewPage() {
     if (!file) return;
 
     setIsUploading(true);
+    setUploadProgress(0);
     try {
-      const filename = await uploadFile(file, UPLOAD_FOLDERS.STORIES);
+      const filename = await uploadFile(file, UPLOAD_FOLDERS.STORIES, (p) => setUploadProgress(p));
       setEditForm(prev => ({ ...prev, mediaUrl: filename }));
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Media uploaded successfully', showConfirmButton: false, timer: 3000 });
     } catch (err: any) {
       Swal.fire({ title: 'Upload Failed', text: err.message, icon: 'error' });
     } finally {
       setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -565,7 +568,7 @@ export default function StoryReviewPage() {
                 <div className="space-y-4">
                   {editForm.mediaUrl ? (
                     <div className="relative group rounded-lg overflow-hidden border border-gray-200">
-                      <img src={getImageUrl(editForm.mediaUrl, UPLOAD_FOLDERS.POSTS) || ""} alt="Cover" className="w-full h-40 object-cover shadow-inner" />
+                      <img src={getImageUrl(editForm.mediaUrl, UPLOAD_FOLDERS.STORIES) || ""} alt="Cover" className="w-full h-40 object-cover shadow-inner" />
                       {isEditing && (
                         <button 
                           type="button" 
@@ -577,9 +580,14 @@ export default function StoryReviewPage() {
                       )}
                     </div>
                   ) : isEditing ? (
-                    <label className={`w-full flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-8 cursor-pointer transition-all ${isUploading ? 'bg-gray-50 border-gray-200' : 'border-gray-200 hover:border-admin-teal/50 hover:bg-admin-teal/5'}`}>
+                    <label className={`w-full flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-8 cursor-pointer transition-all relative overflow-hidden ${isUploading ? 'bg-gray-50 border-gray-200' : 'border-gray-200 hover:border-admin-teal/50 hover:bg-admin-teal/5'}`}>
                       {isUploading ? (
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-admin-teal"></div>
+                        <div className="flex flex-col items-center justify-center py-4 w-full">
+                          <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden mb-2">
+                            <div className="h-full bg-admin-teal transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
+                          </div>
+                          <span className="text-[10px] font-black text-admin-teal uppercase tracking-widest">{uploadProgress}% Uploading</span>
+                        </div>
                       ) : (
                         <>
                           <Upload className="w-8 h-8 text-gray-300 mb-2" />

@@ -69,7 +69,8 @@ export default function StoryCard({ post, index, isBookmarked: initialBookmarked
   if (isVideo && youtubeId) {
     thumb = `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`;
   } else if (post.mediaUrl) {
-    thumb = getImageUrl(post.mediaUrl, UPLOAD_FOLDERS.POSTS) || thumbnails[index % thumbnails.length];
+    const folder = post.isExclusive ? UPLOAD_FOLDERS.STORIES : UPLOAD_FOLDERS.POSTS;
+    thumb = getImageUrl(post.mediaUrl, folder) || thumbnails[index % thumbnails.length];
   }
 
   const handleBookmark = async (e: React.MouseEvent) => {

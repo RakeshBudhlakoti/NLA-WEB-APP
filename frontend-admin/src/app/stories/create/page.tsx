@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminLayout from "@/components/AdminLayout";
-import { fetchApi } from "@/lib/api";
+import { fetchApi, uploadFile } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { 
@@ -45,6 +45,7 @@ export default function CreateStoryPage() {
   });
 
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -66,21 +67,16 @@ export default function CreateStoryPage() {
     if (!file) return;
 
     setUploading(true);
+    setUploadProgress(0);
     try {
-      const uploadData = new FormData();
-      uploadData.append("file", file);
-      
-      const res = await fetchApi("/upload/file?folder=posts", {
-        method: "POST",
-        body: uploadData,
-      });
-
-      setFormData(prev => ({ ...prev, mediaUrl: res.data.fileUrl }));
+      const filename = await uploadFile(file, UPLOAD_FOLDERS.STORIES, (p) => setUploadProgress(p));
+      setFormData(prev => ({ ...prev, mediaUrl: filename }));
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'File uploaded', showConfirmButton: false, timer: 2000 });
     } catch (error: any) {
       Swal.fire({ icon: 'error', title: 'Upload Failed', text: error.message });
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -306,7 +302,7 @@ export default function CreateStoryPage() {
                 <div className="space-y-4">
                   {formData.mediaUrl ? (
                     <div className="relative group rounded-lg overflow-hidden border border-gray-200">
-                      <img src={getImageUrl(formData.mediaUrl, UPLOAD_FOLDERS.POSTS) || ""} alt="Cover" className="w-full h-40 object-cover" />
+                      <img src={getImageUrl(formData.mediaUrl, UPLOAD_FOLDERS.STORIES) || ""} alt="Cover" className="w-full h-40 object-cover" />
                       <button 
                         type="button" 
                         onClick={() => setFormData({ ...formData, mediaUrl: "" })}
@@ -316,9 +312,14 @@ export default function CreateStoryPage() {
                       </button>
                     </div>
                   ) : (
-                    <label className={`w-full flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-8 cursor-pointer transition-all ${uploading ? 'bg-gray-50 border-gray-200' : 'border-gray-200 hover:border-admin-teal/50 hover:bg-admin-teal/5'}`}>
+                    <label className={`w-full flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-8 cursor-pointer transition-all relative overflow-hidden ${uploading ? 'bg-gray-50 border-gray-200' : 'border-gray-200 hover:border-admin-teal/50 hover:bg-admin-teal/5'}`}>
                       {uploading ? (
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-admin-teal"></div>
+                        <div className="flex flex-col items-center justify-center py-4 w-full">
+                          <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden mb-2">
+                            <div className="h-full bg-admin-teal transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
+                          </div>
+                          <span className="text-[10px] font-black text-admin-teal uppercase tracking-widest">{uploadProgress}% Uploading</span>
+                        </div>
                       ) : (
                         <>
                           <Upload className="w-8 h-8 text-gray-300 mb-2" />

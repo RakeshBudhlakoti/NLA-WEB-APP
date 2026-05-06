@@ -312,7 +312,7 @@ function StoriesContent() {
                   const youtubeId = story.type === 'video' ? getYouTubeId(story.mediaUrl) : null;
                   const thumbUrl = youtubeId 
                     ? `https://img.youtube.com/vi/${youtubeId}/default.jpg`
-                    : getImageUrl(story.mediaUrl, UPLOAD_FOLDERS.POSTS) || '/placeholder-image.png';
+                    : getImageUrl(story.mediaUrl, UPLOAD_FOLDERS.STORIES) || '/placeholder-image.png';
 
                   return (
                     <tr key={story.id} className="group hover:bg-blue-50/30 transition-colors border-b border-gray-50 last:border-0">
