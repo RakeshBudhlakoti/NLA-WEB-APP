@@ -207,7 +207,7 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
               <div className="h-40 md:h-64 w-full bg-gray-900 rounded-t-[1.8rem] rounded-b-[2rem] overflow-hidden relative group shadow-inner">
                 {formData.coverUrl ? (
                   <img 
-                    src={getImageUrl(formData.coverUrl, UPLOAD_FOLDERS.STORIES) || ""} 
+                    src={getImageUrl(formData.coverUrl, UPLOAD_FOLDERS.BANNERS) || ""} 
                     alt="Cover" 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out opacity-80" 
                   />

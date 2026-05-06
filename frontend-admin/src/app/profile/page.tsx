@@ -232,7 +232,7 @@ export default function ProfilePage() {
           <div className="h-48 md:h-80 w-full bg-gray-900 rounded-[2rem] overflow-hidden relative group shadow-2xl border-4 border-white">
             {profile.coverUrl ? (
               <img 
-                src={getImageUrl(profile.coverUrl, UPLOAD_FOLDERS.STORIES) || ""} 
+                src={getImageUrl(profile.coverUrl, UPLOAD_FOLDERS.BANNERS) || ""} 
                 alt="Cover" 
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-out opacity-80" 
               />
