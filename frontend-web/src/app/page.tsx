@@ -112,7 +112,7 @@ export default function Home() {
                       id: "admin",
                       profile: {
                         fullName: "NLA Administration",
-                        avatarUrl: ""
+                        avatarUrl: video.author?.profile?.avatarUrl || ""
                       }
                     }
                   };

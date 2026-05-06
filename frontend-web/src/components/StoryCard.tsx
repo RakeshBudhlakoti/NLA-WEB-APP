@@ -20,6 +20,9 @@ interface StoryCardProps {
     isExclusive?: boolean;
     rejectReason?: string;
     createdAt: string;
+    category?: {
+      name: string;
+    };
     _count?: {
       likes: number;
       comments: number;
@@ -153,7 +156,7 @@ export default function StoryCard({ post, index, isBookmarked: initialBookmarked
       <div className="p-5 flex flex-col flex-1">
         <div className="flex items-center justify-between mb-2">
           <span className={`text-[10px] font-bold uppercase tracking-wider ${index % 3 === 0 ? 'text-[#DD2A7B]' : index % 2 === 0 ? 'text-brand-blue' : 'text-[#F58529]'}`}>
-            {index % 3 === 0 ? 'MOTIVATIONAL' : index % 2 === 0 ? 'ATHLETE HUB' : 'PERSONAL'}
+            {post.category?.name || (index % 3 === 0 ? 'MOTIVATIONAL' : index % 2 === 0 ? 'ATHLETE HUB' : 'PERSONAL')}
           </span>
           <div className="flex items-center gap-1 text-muted text-[10px] font-bold">
             <Eye className="w-3 h-3" /> {post.viewCount || 0}
