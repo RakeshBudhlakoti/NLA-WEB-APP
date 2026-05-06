@@ -1,5 +1,5 @@
 const { sendSuccess, sendError } = require('../utils/response');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -30,7 +30,7 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const extension = path.extname(file.originalname) || '.bin';
-    const newName = `${uuidv4()}${extension}`;
+    const newName = `${crypto.randomUUID()}${extension}`;
     console.log(`📄 Generated filename: ${newName}`);
     cb(null, newName);
   }
