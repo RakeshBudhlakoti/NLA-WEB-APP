@@ -10,6 +10,9 @@ const { sanitizeInput } = require('./src/middlewares/sanitize.middleware');
 
 const app = express();
 
+// Trust Vercel / NGINX reverse proxy to prevent rate-limiter crashes
+app.set('trust proxy', 1);
+
 // Middlewares
 app.use(helmet({
   crossOriginResourcePolicy: false,
