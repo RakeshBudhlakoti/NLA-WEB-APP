@@ -38,14 +38,16 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
   const [showPassword, setShowPassword] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setIsUploadingAvatar(true);
+    setUploadProgress(0);
     try {
-      const filename = await uploadFile(file, "avatars");
+      const filename = await uploadFile(file, "avatars", (p) => setUploadProgress(p));
       setFormData(prev => ({ ...prev, avatarUrl: filename }));
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Avatar updated', showConfirmButton: false, timer: 2000 });
     } catch (error: any) {
@@ -53,6 +55,7 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
       Swal.fire({ icon: 'error', title: 'Upload Failed', text: error.message });
     } finally {
       setIsUploadingAvatar(false);
+      setUploadProgress(0);
     }
   };
 
@@ -61,8 +64,9 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
     if (!file) return;
 
     setIsUploadingCover(true);
+    setUploadProgress(0);
     try {
-      const filename = await uploadFile(file, UPLOAD_FOLDERS.BANNERS);
+      const filename = await uploadFile(file, UPLOAD_FOLDERS.BANNERS, (p) => setUploadProgress(p));
       setFormData(prev => ({ ...prev, coverUrl: filename }));
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Cover image updated', showConfirmButton: false, timer: 2000 });
     } catch (error: any) {
@@ -70,6 +74,7 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
       Swal.fire({ icon: 'error', title: 'Upload Failed', text: error.message });
     } finally {
       setIsUploadingCover(false);
+      setUploadProgress(0);
     }
   };
 
@@ -228,6 +233,16 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
 
                 {/* Bottom Overlay for Text Contrast */}
                 <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/80 to-transparent"></div>
+
+                {/* Progress Overlay */}
+                {isUploadingCover && (
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-30">
+                    <div className="text-white font-black text-lg mb-2">{uploadProgress}%</div>
+                    <div className="w-48 h-2 bg-white/20 rounded-full overflow-hidden">
+                      <div className="h-full bg-admin-teal transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Avatar and Name - Negative Margin approach */}
@@ -236,13 +251,22 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
                   <div className="w-24 h-24 md:w-32 md:h-32 rounded-[1.5rem] md:rounded-[2rem] border-[4px] border-white overflow-hidden shadow-xl bg-white bg-clip-padding relative z-10 mx-auto md:mx-0">
                     {formData.avatarUrl ? (
                       <img 
-                        src={getImageUrl(formData.avatarUrl, UPLOAD_FOLDERS.AVATARS) || ""} 
+                        src={getImageUrl(formData.avatarUrl, "avatars") || ""} 
                         alt="Avatar" 
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" 
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gray-50">
                         <User className="w-8 h-8 md:w-10 md:h-10 text-gray-200" />
+                      </div>
+                    )}
+
+                    {isUploadingAvatar && (
+                      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-30">
+                        <div className="text-white font-black text-xs mb-1.5">{uploadProgress}%</div>
+                        <div className="w-16 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                          <div className="h-full bg-admin-teal transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
+                        </div>
                       </div>
                     )}
                   </div>

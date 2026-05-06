@@ -92,7 +92,11 @@ export const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
   }
 };
 
-export async function uploadFile(file: File, folder: string = 'uploads'): Promise<string> {
+export async function uploadFile(
+  file: File, 
+  folder: string = 'uploads',
+  onProgress?: (progress: number) => void
+): Promise<string> {
   // Proactive check for Vercel's payload limit (usually 4.5MB)
   if (file.size > 4 * 1024 * 1024) {
     throw new Error('File size exceeds 4MB limit. Please compress your image before uploading.');
@@ -102,22 +106,28 @@ export async function uploadFile(file: File, folder: string = 'uploads'): Promis
     const formData = new FormData();
     formData.append('file', file);
 
-    const token = typeof window !== 'undefined' ? localStorage.getItem('nla_access_token') : null;
-    // Send folder in query string to ensure it's available to Multer immediately
-    const response = await fetch(`${API_URL}/upload/file?folder=${folder}`, {
-      method: 'POST',
+    const response = await api.post(`/upload/file?folder=${folder}`, formData, {
       headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        'Content-Type': 'multipart/form-data'
       },
-      body: formData,
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total && onProgress) {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percentCompleted);
+        }
+      }
     });
 
-    const res = await response.json();
-    if (!response.ok) throw new Error(res.message || 'Upload failed');
+    if (!response.data || !response.data.data) {
+      throw new Error('Invalid response from server');
+    }
 
-    return res.data.fileUrl;
+    return response.data.data.fileUrl;
   } catch (error: any) {
     console.error('Upload Error:', error);
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    }
     throw error;
   }
 }

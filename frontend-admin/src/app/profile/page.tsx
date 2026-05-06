@@ -48,6 +48,7 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -126,14 +127,16 @@ export default function ProfilePage() {
     }
 
     setIsUploading(true);
+    setUploadProgress(0);
     try {
-      const filename = await uploadFile(file, UPLOAD_FOLDERS.AVATARS);
+      const filename = await uploadFile(file, UPLOAD_FOLDERS.AVATARS, (p) => setUploadProgress(p));
       setProfile(prev => ({ ...prev, avatarUrl: filename }));
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Avatar uploaded successfully', showConfirmButton: false, timer: 3000 });
-    } catch (error) {
-      Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Failed to upload avatar', showConfirmButton: false, timer: 3000 });
+    } catch (error: any) {
+      Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: error.message || 'Failed to upload avatar', showConfirmButton: false, timer: 3000 });
     } finally {
       setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -147,14 +150,16 @@ export default function ProfilePage() {
     }
 
     setIsUploadingCover(true);
+    setUploadProgress(0);
     try {
-      const filename = await uploadFile(file, UPLOAD_FOLDERS.BANNERS);
+      const filename = await uploadFile(file, UPLOAD_FOLDERS.BANNERS, (p) => setUploadProgress(p));
       setProfile(prev => ({ ...prev, coverUrl: filename }));
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Banner updated successfully', showConfirmButton: false, timer: 3000 });
     } catch (error: any) {
       Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: error.message || 'Failed to upload banner', showConfirmButton: false, timer: 3000 });
     } finally {
       setIsUploadingCover(false);
+      setUploadProgress(0);
     }
   };
 
@@ -253,6 +258,16 @@ export default function ProfilePage() {
 
             {/* Bottom Overlay for Text Contrast */}
             <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 to-transparent"></div>
+
+            {/* Progress Overlay */}
+            {isUploadingCover && (
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-30">
+                <div className="text-white font-black text-lg mb-2">{uploadProgress}%</div>
+                <div className="w-48 h-2 bg-white/20 rounded-full overflow-hidden">
+                  <div className="h-full bg-admin-teal transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Avatar and Name - Negative Margin approach */}
@@ -268,6 +283,15 @@ export default function ProfilePage() {
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-50">
                     <UserIcon className="w-10 h-10 md:w-12 md:h-12 text-gray-200" />
+                  </div>
+                )}
+
+                {isUploading && (
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-30">
+                    <div className="text-white font-black text-xs mb-1.5">{uploadProgress}%</div>
+                    <div className="w-16 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                      <div className="h-full bg-admin-teal transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
+                    </div>
                   </div>
                 )}
               </div>
