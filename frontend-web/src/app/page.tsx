@@ -2,76 +2,109 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Search, Play, Trophy, Users, TrendingUp, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Search, Play, Trophy, Users, TrendingUp, ArrowRight, Star } from "lucide-react";
 import StoryCard from "@/components/StoryCard";
 import { SkeletonCardGrid } from "@/components/Skeleton";
 import { fetchApi } from "@/lib/api";
 import { getImageUrl, UPLOAD_FOLDERS } from "@/lib/constants";
 
 export default function Home() {
-  const [posts, setPosts] = useState<any[]>([]);
+  const router = useRouter();
+  const [adminPicks, setAdminPicks] = useState<any[]>([]);
   const [exclusivePosts, setExclusivePosts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
-    const loadPosts = async () => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const loadData = async () => {
       try {
-        const [recentRes, exclusiveRes] = await Promise.all([
-          fetchApi('/posts?limit=8&isExclusive=false'),
+        const [picksRes, exclusiveRes] = await Promise.all([
+          fetchApi('/posts?limit=8&isAdminPick=true'),
           fetchApi('/posts?limit=3&isExclusive=true')
         ]);
-        setPosts(recentRes.data || []);
+        setAdminPicks(picksRes.data || []);
         setExclusivePosts(exclusiveRes.data || []);
       } catch (error) {
-        console.error("Failed to load posts", error);
+        console.error("Failed to load home data", error);
       } finally {
         setIsLoading(false);
       }
     };
-    loadPosts();
+    loadData();
   }, []);
 
-  const getYouTubeId = (url?: string) => {
-    if (!url) return null;
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : null;
-  };
-
-  const stripHtml = (html: string) => {
-    return html?.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ') || "";
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/stories?q=${encodeURIComponent(searchQuery)}`);
+    }
   };
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section */}
-      <div className="relative min-h-[50vh] lg:min-h-[75vh] flex flex-col justify-center border-b border-gray-100 overflow-hidden bg-white">
-        <div className="absolute inset-0 z-0">
-          <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2500&auto=format&fit=crop" alt="Hero background" className="w-full h-full object-cover opacity-10 scale-105" />
+      {/* Hero Section with Parallax */}
+      <div className="relative min-h-[70vh] lg:min-h-[90vh] flex flex-col justify-center border-b border-gray-100 overflow-hidden bg-white">
+        <div 
+          className="absolute inset-0 z-0 transition-transform duration-75 ease-out"
+          style={{ transform: `translateY(${scrollY * 0.3}px)` }}
+        >
+          <img 
+            src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2500&auto=format&fit=crop" 
+            alt="Hero background" 
+            className="w-full h-full object-cover opacity-10" 
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent"></div>
         </div>
         
         <section className="container mx-auto px-4 relative z-20 py-16 lg:py-24">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center px-4 py-1.5 rounded-full border border-brand-blue bg-blue-50 mb-8">
-              <span className="text-[10px] font-black text-brand-blue uppercase tracking-widest">GLOBAL ATHLETE HUB</span>
+            <div className="inline-flex items-center px-4 py-1.5 rounded-full border border-brand-blue bg-blue-50 mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+              <span className="text-[10px] font-black text-brand-blue uppercase tracking-widest">NICHE SPORTS PLATFORM</span>
             </div>
             
-            <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.8] text-gray-900">
+            <h1 className="text-6xl md:text-9xl font-black tracking-tighter mb-8 leading-[0.8] text-gray-900 animate-in fade-in slide-in-from-bottom-8 duration-700">
               FUEL YOUR <br/>
               <span className="text-gradient-insta">PURSUIT</span>
             </h1>
             
-            <p className="text-lg text-gray-500 max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
+            <p className="text-lg md:text-xl text-gray-500 max-w-2xl mx-auto mb-12 leading-relaxed font-medium animate-in fade-in slide-in-from-bottom-10 duration-1000">
               A centralized platform for the wrestling and athletics community to share journeys, celebrate success, and inspire the next generation.
             </p>
             
-            <div className="flex flex-wrap justify-center gap-6">
+            {/* Global Search Bar */}
+            <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-12 relative animate-in fade-in zoom-in-95 duration-700 delay-300">
+              <div className="relative group">
+                <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-brand-blue transition-colors" />
+                <input 
+                  type="text"
+                  placeholder="Search Athlete, Sports, Stories..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-16 pr-32 py-6 bg-white border-2 border-gray-100 rounded-[2rem] shadow-xl shadow-gray-100/50 focus:border-brand-blue focus:ring-0 outline-none transition-all text-gray-900 font-bold"
+                />
+                <button 
+                  type="submit"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 px-8 py-3.5 bg-brand-blue text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg"
+                >
+                  Search
+                </button>
+              </div>
+            </form>
+            
+            <div className="flex flex-wrap justify-center gap-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
               <Link 
-                href="/stories" 
+                href="/submit" 
                 className="px-10 py-4 bg-brand-red text-white rounded-2xl font-black hover:bg-red-600 transition-all shadow-xl shadow-red-500/20 text-sm uppercase tracking-widest"
               >
-                Explore Stories
+                Submit Your Story
               </Link>
               <Link 
                 href="/leaderboard" 
@@ -116,18 +149,18 @@ export default function Home() {
                       }
                     }
                   };
-                  return <StoryCard key={video.id} post={adminVideo} index={i} />;
+                  return <StoryCard key={video.id} post={adminVideo} index={i} minimal={true} />;
                 })
               )}
             </div>
           </section>
 
-          {/* Inspiring Stories */}
-          <section id="stories" className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150">
+          {/* Admin's Top 8 Picks (Replaces Recent Stories) */}
+          <section id="admin-picks" className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150">
             <div className="flex justify-between items-end mb-10">
               <div>
-                <h2 className="text-4xl font-black mb-2 tracking-tighter uppercase">Recent Stories</h2>
-                <div className="h-1.5 w-20 bg-brand-blue rounded-full" />
+                <h2 className="text-4xl font-black mb-2 tracking-tighter uppercase">Admin's Top 8 Picks</h2>
+                <div className="h-1.5 w-20 bg-brand-yellow rounded-full" />
               </div>
               <Link href="/stories" className="group flex items-center gap-2 text-brand-blue font-black text-xs uppercase tracking-widest hover:underline">
                 Explore All <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -136,9 +169,14 @@ export default function Home() {
 
             {isLoading ? (
               <SkeletonCardGrid count={8} />
+            ) : adminPicks.length === 0 ? (
+              <div className="text-center py-20 bg-gray-50 rounded-[3rem] border border-dashed">
+                <Star className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+                <p className="text-muted font-bold uppercase tracking-widest text-xs">No picks selected yet</p>
+              </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                {posts.map((post, i) => (
+                {adminPicks.map((post, i) => (
                   <StoryCard key={post.id} post={post} index={i} />
                 ))}
               </div>

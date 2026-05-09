@@ -81,6 +81,7 @@ model Post {
   challenge    String?
   motivation   String?
   isExclusive  Boolean    @default(false)
+  isAdminPick  Boolean    @default(false)
   description  String?
   editorialHighlights String?
   bookmarks    Bookmark[]

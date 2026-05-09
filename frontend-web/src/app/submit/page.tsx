@@ -54,7 +54,7 @@ export default function SubmitStory() {
   if (videoId) {
     thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
   } else if (mediaUrl) {
-    thumbnailUrl = getImageUrl(mediaUrl, UPLOAD_FOLDERS.POSTS) || thumbnailUrl;
+    thumbnailUrl = getImageUrl(mediaUrl, UPLOAD_FOLDERS.STORIES) || thumbnailUrl;
   }
 
   const handleNext = () => {
@@ -74,7 +74,7 @@ export default function SubmitStory() {
 
     setIsUploading(true);
     try {
-      const filename = await uploadFileToS3(file, UPLOAD_FOLDERS.POSTS);
+      const filename = await uploadFileToS3(file, UPLOAD_FOLDERS.STORIES);
       setMediaUrl(filename);
       setYoutubeUrl(""); // Clear youtube if file is uploaded
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'File uploaded successfully', showConfirmButton: false, timer: 3000 });

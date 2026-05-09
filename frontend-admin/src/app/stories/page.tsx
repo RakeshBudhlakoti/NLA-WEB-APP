@@ -17,9 +17,11 @@ interface Story {
   status: string;
   mediaUrl: string;
   isExclusive: boolean;
+  isAdminPick: boolean;
   viewCount: number;
   updatedAt: string;
   author: {
+    id: string;
     email: string;
     profile?: {
       fullName?: string;
@@ -340,9 +342,22 @@ function StoriesContent() {
                           <Link href={`/stories/${story.id}`} className="font-bold text-admin-teal hover:text-teal-700">
                             {story.title}
                           </Link>
-                          {story.isExclusive && <span title="Exclusive Video"><Star className="w-3 h-3 text-yellow-500 fill-yellow-500" /></span>}
+                          <div className="flex gap-1">
+                            {story.isAdminPick && (
+                              <span className="px-1.5 py-0.5 bg-yellow-100 text-yellow-700 text-[9px] font-black uppercase rounded border border-yellow-200 tracking-tighter" title="Admin's Top 8 Pick">
+                                Top Pick
+                              </span>
+                            )}
+                            {story.isExclusive && (
+                              <span className="px-1.5 py-0.5 bg-purple-100 text-purple-700 text-[9px] font-black uppercase rounded border border-purple-200 tracking-tighter" title="Exclusive Content">
+                                Exclusive
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mt-0.5">{story.type}</span>
+                        <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mt-0.5">
+                          {story.type}
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 border-r border-gray-100">
@@ -356,7 +371,9 @@ function StoriesContent() {
                       </div>
                     </td>
                     <td className="px-6 py-4 border-r border-gray-100 text-gray-600 font-medium whitespace-nowrap">
-                      {story.author?.profile?.fullName || story.author?.email}
+                      <Link href={`/users/${story.author.id}`} className="hover:text-admin-teal hover:underline transition-colors">
+                        {story.author?.profile?.fullName || story.author?.email}
+                      </Link>
                     </td>
                     <td className="px-6 py-4 border-r border-gray-100 font-medium text-center">
                       {story.status === 'APPROVED' ? <span className="text-green-600">Published</span> : 

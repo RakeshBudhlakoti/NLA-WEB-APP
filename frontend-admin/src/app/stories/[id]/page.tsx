@@ -13,6 +13,7 @@ import "react-quill-new/dist/quill.snow.css";
 
 import { 
   ChevronLeft, 
+  Check,
   CheckCircle, 
   XCircle, 
   Star, 
@@ -54,6 +55,7 @@ export default function StoryReviewPage() {
     categoryId: "", 
     mediaUrl: "",
     isExclusive: false,
+    isAdminPick: false,
     type: "image",
     status: "PENDING"
   });
@@ -80,6 +82,7 @@ export default function StoryReviewPage() {
         categoryId: storyRes.data.categoryId || "",
         mediaUrl: storyRes.data.mediaUrl || "",
         isExclusive: storyRes.data.isExclusive || false,
+        isAdminPick: storyRes.data.isAdminPick || false,
         type: storyRes.data.type || "image",
         status: storyRes.data.status || "PENDING"
       });
@@ -466,19 +469,41 @@ export default function StoryReviewPage() {
               </div>
 
               <div className="pt-2">
-                <label className={`flex items-center gap-3 group ${isEditing ? 'cursor-pointer' : 'cursor-default'}`}>
-                  <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${editForm.isExclusive ? 'bg-admin-teal border-admin-teal' : 'border-gray-300'}`}>
-                    <input
-                      type="checkbox"
-                      className="hidden"
-                      disabled={!isEditing}
-                      checked={editForm.isExclusive}
-                      onChange={e => setEditForm({ ...editForm, isExclusive: e.target.checked })}
-                    />
-                    {editForm.isExclusive && <Star className="w-3 h-3 text-white fill-white" />}
-                  </div>
-                  <span className={`text-xs font-bold text-gray-700 ${isEditing ? 'group-hover:text-admin-teal transition-colors' : ''} uppercase tracking-tight`}>Exclusive Content</span>
-                </label>
+                <div className="flex flex-col gap-4">
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${editForm.isAdminPick ? 'bg-admin-teal border-admin-teal' : 'border-gray-300'}`}>
+                      <input
+                        type="checkbox"
+                        className="hidden"
+                        disabled={!isEditing}
+                        checked={editForm.isAdminPick}
+                        onChange={e => setEditForm({ ...editForm, isAdminPick: e.target.checked })}
+                      />
+                      {editForm.isAdminPick && <Check className="w-3.5 h-3.5 text-white" />}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-700">Admin's Top 8 Pick</p>
+                      <p className="text-[10px] text-gray-400 font-medium">Highlight on home page</p>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${editForm.isExclusive ? 'bg-admin-teal border-admin-teal' : 'border-gray-300'}`}>
+                      <input
+                        type="checkbox"
+                        className="hidden"
+                        disabled={!isEditing}
+                        checked={editForm.isExclusive}
+                        onChange={e => setEditForm({ ...editForm, isExclusive: e.target.checked })}
+                      />
+                      {editForm.isExclusive && <Check className="w-3.5 h-3.5 text-white" />}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-700">NLA Exclusive</p>
+                      <p className="text-[10px] text-gray-400 font-medium">Premium content badge</p>
+                    </div>
+                  </label>
+                </div>
               </div>
 
               {/* Author Details (Sidebar) */}

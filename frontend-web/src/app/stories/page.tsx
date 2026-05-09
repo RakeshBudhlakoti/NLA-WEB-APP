@@ -1,16 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Filter, Search, Grid } from "lucide-react";
 import StoryCard from "@/components/StoryCard";
 import { SkeletonCardGrid } from "@/components/Skeleton";
 import { fetchApi } from "@/lib/api";
 
-export default function StoriesListing() {
+function StoriesContent() {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get('q') || "";
+  
   const [posts, setPosts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -144,5 +148,13 @@ export default function StoriesListing() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function StoriesListing() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-20 text-center text-muted font-bold uppercase tracking-widest">Loading Explorer...</div>}>
+      <StoriesContent />
+    </Suspense>
   );
 }

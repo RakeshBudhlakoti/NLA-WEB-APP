@@ -18,7 +18,9 @@ interface StoryCardProps {
     viewCount: number;
     status: string;
     isExclusive?: boolean;
+    isAdminPick?: boolean;
     rejectReason?: string;
+    description?: string;
     createdAt: string;
     category?: {
       name: string;
@@ -38,9 +40,10 @@ interface StoryCardProps {
   index: number;
   isBookmarked?: boolean;
   onBookmarkToggle?: (id: string, state: boolean) => void;
+  minimal?: boolean;
 }
 
-export default function StoryCard({ post, index, isBookmarked: initialBookmarked = false, onBookmarkToggle }: StoryCardProps) {
+export default function StoryCard({ post, index, isBookmarked: initialBookmarked = false, onBookmarkToggle, minimal = false }: StoryCardProps) {
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
   const { user } = useAuth();
   const isVideo = post.type === 'video';
@@ -69,8 +72,7 @@ export default function StoryCard({ post, index, isBookmarked: initialBookmarked
   if (isVideo && youtubeId) {
     thumb = `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`;
   } else if (post.mediaUrl) {
-    const folder = post.isExclusive ? UPLOAD_FOLDERS.STORIES : UPLOAD_FOLDERS.POSTS;
-    thumb = getImageUrl(post.mediaUrl, folder) || thumbnails[index % thumbnails.length];
+    thumb = getImageUrl(post.mediaUrl, UPLOAD_FOLDERS.STORIES) || thumbnails[index % thumbnails.length];
   }
 
   const handleBookmark = async (e: React.MouseEvent) => {
@@ -155,14 +157,16 @@ export default function StoryCard({ post, index, isBookmarked: initialBookmarked
       </Link>
       
       <div className="p-5 flex flex-col flex-1">
-        <div className="flex items-center justify-between mb-2">
-          <span className={`text-[10px] font-bold uppercase tracking-wider ${index % 3 === 0 ? 'text-[#DD2A7B]' : index % 2 === 0 ? 'text-brand-blue' : 'text-[#F58529]'}`}>
-            {post.category?.name || (index % 3 === 0 ? 'MOTIVATIONAL' : index % 2 === 0 ? 'ATHLETE HUB' : 'PERSONAL')}
-          </span>
-          <div className="flex items-center gap-1 text-muted text-[10px] font-bold">
-            <Eye className="w-3 h-3" /> {post.viewCount || 0}
+        {!minimal && (
+          <div className="flex items-center justify-between mb-2">
+            <span className={`text-[10px] font-bold uppercase tracking-wider ${index % 3 === 0 ? 'text-[#DD2A7B]' : index % 2 === 0 ? 'text-brand-blue' : 'text-[#F58529]'}`}>
+              {post.category?.name || (index % 3 === 0 ? 'MOTIVATIONAL' : index % 2 === 0 ? 'ATHLETE HUB' : 'PERSONAL')}
+            </span>
+            <div className="flex items-center gap-1 text-muted text-[10px] font-bold">
+              <Eye className="w-3 h-3" /> {post.viewCount || 0}
+            </div>
           </div>
-        </div>
+        )}
         
         <Link href={`/stories/${post.id}`} style={{ color: 'var(--foreground)' }} className="block font-bold leading-tight mb-2 hover:text-brand-blue transition-colors text-lg">
           {post.title}
@@ -182,29 +186,44 @@ export default function StoryCard({ post, index, isBookmarked: initialBookmarked
         )}
         
         <p className="text-muted text-xs line-clamp-2 mb-4 leading-relaxed flex-1">
-          {stripHtml(post.content)}
+          {stripHtml(post.description || post.content)}
         </p>
         
-        <div style={{ borderColor: 'var(--border)' }} className="mt-auto flex items-center justify-between pt-4 border-t">
-          <Link href={`/users/${post.author.id}`} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold overflow-hidden ${index % 3 === 0 ? 'bg-brand-blue' : index % 2 === 0 ? 'bg-brand-red' : 'bg-brand-yellow'}`}>
-              {post.author.profile?.avatarUrl ? (
-                <img src={getImageUrl(post.author.profile.avatarUrl, UPLOAD_FOLDERS.AVATARS) || ""} alt="Avatar" className="w-full h-full object-cover" />
-              ) : (
-                post.author.profile?.fullName.charAt(0) || "U"
-              )}
+        {!minimal && (
+          <div style={{ borderColor: 'var(--border)' }} className="mt-auto flex items-center justify-between pt-4 border-t">
+            {post.author.id === "admin" ? (
+            <div className="flex items-center gap-2">
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold overflow-hidden ${index % 3 === 0 ? 'bg-brand-blue' : index % 2 === 0 ? 'bg-brand-red' : 'bg-brand-yellow'}`}>
+                {post.author.profile?.avatarUrl ? (
+                  <img src={getImageUrl(post.author.profile.avatarUrl, UPLOAD_FOLDERS.AVATARS) || ""} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  post.author.profile?.fullName?.charAt(0) || "U"
+                )}
+              </div>
+              <span style={{ color: 'var(--foreground)' }} className="text-xs font-bold">{post.author.profile?.fullName || 'NLA Administration'}</span>
             </div>
-            <span style={{ color: 'var(--foreground)' }} className="text-xs font-bold">{post.author.profile?.fullName || 'Unknown Athlete'}</span>
-          </Link>
-          <div className="flex items-center gap-3 text-muted text-xs">
-            <button className="flex items-center gap-1 hover:text-brand-red transition-colors font-bold">
-              <Heart className="w-3.5 h-3.5" /> {post._count?.likes || 0}
-            </button>
-            <Link href={`/stories/${post.id}`} className="flex items-center gap-1 hover:text-brand-blue transition-colors font-bold">
-              <MessageCircle className="w-3.5 h-3.5" /> {post._count?.comments || 0}
+          ) : (
+            <Link href={`/users/${post.author.id}`} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold overflow-hidden ${index % 3 === 0 ? 'bg-brand-blue' : index % 2 === 0 ? 'bg-brand-red' : 'bg-brand-yellow'}`}>
+                {post.author.profile?.avatarUrl ? (
+                  <img src={getImageUrl(post.author.profile.avatarUrl, UPLOAD_FOLDERS.AVATARS) || ""} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  post.author.profile?.fullName?.charAt(0) || "U"
+                )}
+              </div>
+              <span style={{ color: 'var(--foreground)' }} className="text-xs font-bold">{post.author.profile?.fullName || 'Unknown Athlete'}</span>
             </Link>
+          )}
+            <div className="flex items-center gap-3 text-muted text-xs">
+              <button className="flex items-center gap-1 hover:text-brand-red transition-colors font-bold">
+                <Heart className="w-3.5 h-3.5" /> {post._count?.likes || 0}
+              </button>
+              <Link href={`/stories/${post.id}`} className="flex items-center gap-1 hover:text-brand-blue transition-colors font-bold">
+                <MessageCircle className="w-3.5 h-3.5" /> {post._count?.comments || 0}
+              </Link>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

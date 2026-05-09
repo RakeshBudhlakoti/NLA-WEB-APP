@@ -51,7 +51,7 @@ const getAdminPosts = async (req, res) => {
       prisma.post.findMany({
         where,
         include: { 
-          author: { select: { email: true, profile: true } }, 
+          author: { select: { id: true, email: true, profile: true } }, 
           category: true,
           _count: { select: { likes: true, comments: true } }
         },
@@ -164,7 +164,7 @@ const getDeletedPosts = async (req, res) => {
     const [posts, total] = await Promise.all([
       prisma.post.findMany({
         where,
-        include: { author: { select: { email: true, profile: true } }, category: true },
+        include: { author: { select: { id: true, email: true, profile: true } }, category: true },
         orderBy: { updatedAt: 'desc' },
         skip,
         take: limit

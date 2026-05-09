@@ -109,7 +109,7 @@ export default function AthleteDetail({ params }: { params: Promise<{ id: string
         <div className="h-64 md:h-80 w-full bg-zinc-900 overflow-hidden relative">
           {profile.coverUrl ? (
             <img 
-              src={getImageUrl(profile.coverUrl, UPLOAD_FOLDERS.STORIES)} 
+              src={getImageUrl(profile.coverUrl, UPLOAD_FOLDERS.BANNERS)} 
               className="w-full h-full object-cover" 
               alt="Cover Banner" 
             />

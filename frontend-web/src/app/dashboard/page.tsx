@@ -182,7 +182,7 @@ export default function UnifiedDashboard() {
 
     setIsUploading(true);
     try {
-      const filename = await uploadFileToS3(file, UPLOAD_FOLDERS.POSTS);
+      const filename = await uploadFileToS3(file, UPLOAD_FOLDERS.STORIES);
       setEditForm(prev => ({ ...prev, mediaUrl: filename, youtubeUrl: "" }));
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Uploaded!', showConfirmButton: false, timer: 2000 });
     } catch (err: any) {
@@ -246,7 +246,7 @@ export default function UnifiedDashboard() {
   if (videoId) {
     thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
   } else if (editForm.mediaUrl) {
-    thumbnailUrl = getImageUrl(editForm.mediaUrl, UPLOAD_FOLDERS.POSTS) || "";
+    thumbnailUrl = getImageUrl(editForm.mediaUrl, UPLOAD_FOLDERS.STORIES) || "";
   }
 
   const badges = [
@@ -263,7 +263,7 @@ export default function UnifiedDashboard() {
       <div className="h-64 md:h-80 bg-zinc-900 relative overflow-hidden">
         {profile.coverUrl ? (
           <img 
-            src={getImageUrl(profile.coverUrl, UPLOAD_FOLDERS.STORIES)} 
+            src={getImageUrl(profile.coverUrl, UPLOAD_FOLDERS.BANNERS)} 
             className="w-full h-full object-cover" 
             alt="Dashboard Cover" 
           />
@@ -466,7 +466,7 @@ export default function UnifiedDashboard() {
                                 ) : (
                                     myPosts.map(post => {
                                         const youtubeId = post.type === 'video' ? getYoutubeId(post.mediaUrl) : null;
-                                        const thumb = youtubeId ? `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg` : (getImageUrl(post.mediaUrl, UPLOAD_FOLDERS.POSTS) || "");
+                                        const thumb = youtubeId ? `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg` : (getImageUrl(post.mediaUrl, UPLOAD_FOLDERS.STORIES) || "");
 
                                         return (
                                             <div key={post.id} className="grid grid-cols-12 gap-4 px-8 py-8 items-center hover:bg-gray-50/50 transition-colors group">

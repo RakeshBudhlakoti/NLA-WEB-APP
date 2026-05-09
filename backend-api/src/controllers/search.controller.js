@@ -12,7 +12,8 @@ const search = async (req, res) => {
         status: 'APPROVED',
         OR: [
           { title: { contains: q, mode: 'insensitive' } },
-          { content: { contains: q, mode: 'insensitive' } }
+          { content: { contains: q, mode: 'insensitive' } },
+          { author: { profile: { fullName: { contains: q, mode: 'insensitive' } } } }
         ]
       },
       include: { author: { select: { id: true, profile: true } } },

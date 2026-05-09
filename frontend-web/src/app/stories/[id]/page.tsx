@@ -141,7 +141,7 @@ export default function StoryDetail({ params }: { params: Promise<{ id: string }
   };
 
   const youtubeId = isVideo ? getYouTubeId(post.mediaUrl) : null;
-  const currentMediaUrl = getImageUrl(post.mediaUrl, UPLOAD_FOLDERS.POSTS);
+  const currentMediaUrl = getImageUrl(post.mediaUrl, UPLOAD_FOLDERS.STORIES);
 
   return (
     <div className="flex-1 bg-white pb-32">

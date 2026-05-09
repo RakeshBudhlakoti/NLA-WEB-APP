@@ -5,7 +5,7 @@ const emailService = require('../utils/email.service');
 
 const createPost = async (req, res) => {
   try {
-    const { title, description, content, challenge, motivation, achievement, editorialHighlights, mediaUrl, type, categoryId, isExclusive } = req.body;
+    const { title, description, content, challenge, motivation, achievement, editorialHighlights, mediaUrl, type, categoryId, isExclusive, isAdminPick } = req.body;
     const isAdmin = req.user.role === 'ADMIN' || req.user.role === 'SUPER_ADMIN';
     const status = isAdmin ? 'APPROVED' : 'PENDING';
     console.log(`📝 Creating story: role=${req.user.role}, isAdmin=${isAdmin}, status=${status}`);
@@ -24,7 +24,8 @@ const createPost = async (req, res) => {
         categoryId,
         authorId: req.user.id,
         status,
-        isExclusive: isExclusive === true || isExclusive === 'true'
+        isExclusive: isExclusive === true || isExclusive === 'true',
+        isAdminPick: isAdminPick === true || isAdminPick === 'true'
       }
     });
 
@@ -70,6 +71,7 @@ const getPosts = async (req, res) => {
     const where = { isDeleted: false, status: 'APPROVED' };
     if (type) where.type = type;
     if (isExclusive !== undefined) where.isExclusive = isExclusive === 'true';
+    if (req.query.isAdminPick !== undefined) where.isAdminPick = req.query.isAdminPick === 'true';
     
     if (category) {
       const cat = await prisma.category.findUnique({ where: { name: category } });
@@ -156,7 +158,7 @@ const getPostById = async (req, res) => {
 
 const updatePost = async (req, res) => {
   try {
-    const { title, description, content, challenge, motivation, achievement, editorialHighlights, mediaUrl, categoryId, isExclusive, type } = req.body;
+    const { title, description, content, challenge, motivation, achievement, editorialHighlights, mediaUrl, categoryId, isExclusive, isAdminPick, type } = req.body;
     const post = await prisma.post.findUnique({ where: { id: req.params.id } });
     
     if (!post) return sendError(res, 'Post not found', null, 404);
@@ -177,6 +179,10 @@ const updatePost = async (req, res) => {
       dataToUpdate.isExclusive = isExclusive === true || isExclusive === 'true';
     }
 
+    if (isAdminPick !== undefined) {
+      dataToUpdate.isAdminPick = isAdminPick === true || isAdminPick === 'true';
+    }
+
     // If a rejected post is edited, move back to PENDING
     if (post.status === 'REJECTED' && req.user.role !== 'ADMIN') {
       dataToUpdate.status = 'PENDING';
@@ -187,6 +193,8 @@ const updatePost = async (req, res) => {
       where: { id: req.params.id },
       data: dataToUpdate
     });
+
+    console.log('✅ Post updated successfully:', { id: updated.id, isAdminPick: updated.isAdminPick });
 
     if (dataToUpdate.status === 'PENDING') {
       const admins = await prisma.user.findMany({ where: { role: 'ADMIN' } });

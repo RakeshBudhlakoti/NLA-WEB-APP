@@ -238,15 +238,30 @@ export default function SettingsPage() {
              <h2 className="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Platform Policies</h2>
              <div className="flex items-center justify-between py-2">
                 <span className="text-sm font-medium text-gray-700">Allow Edits After Approval</span>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    className="sr-only peer" 
-                    checked={settings.allowEditAfterApproval === "true"}
-                    onChange={(e) => setSettings(prev => ({ ...prev, allowEditAfterApproval: e.target.checked ? "true" : "false" }))}
-                  />
-                  <div className="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-admin-teal"></div>
-                </label>
+                 <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="radio" 
+                        name="allowEditAfterApproval" 
+                        value="true"
+                        checked={settings.allowEditAfterApproval === "true"}
+                        onChange={() => setSettings(prev => ({ ...prev, allowEditAfterApproval: "true" }))}
+                        className="w-4 h-4 text-admin-teal focus:ring-admin-teal"
+                      />
+                      <span className="text-sm text-gray-700">Yes</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="radio" 
+                        name="allowEditAfterApproval" 
+                        value="false"
+                        checked={settings.allowEditAfterApproval === "false"}
+                        onChange={() => setSettings(prev => ({ ...prev, allowEditAfterApproval: "false" }))}
+                        className="w-4 h-4 text-admin-teal focus:ring-admin-teal"
+                      />
+                      <span className="text-sm text-gray-700">No</span>
+                    </label>
+                 </div>
              </div>
           </div>
         </div>

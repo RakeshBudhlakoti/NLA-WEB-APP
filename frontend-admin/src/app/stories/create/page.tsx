@@ -41,7 +41,8 @@ export default function CreateStoryPage() {
     type: "image",
     categoryId: "",
     mediaUrl: "",
-    isExclusive: false
+    isExclusive: false,
+    isAdminPick: false
   });
 
   const [uploading, setUploading] = useState(false);
@@ -147,13 +148,15 @@ export default function CreateStoryPage() {
 
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Short Description / Hook</label>
-                <textarea
-                  rows={2}
-                  placeholder="A brief hook for the story feed..."
-                  className="w-full px-4 py-3 rounded border border-gray-300 focus:ring-1 focus:ring-admin-teal outline-none transition-all text-sm resize-none"
-                  value={formData.description}
-                  onChange={e => setFormData({ ...formData, description: e.target.value })}
-                />
+                <div className="quill-editor-container">
+                  <ReactQuill
+                    theme="snow"
+                    placeholder="A brief hook for the story feed..."
+                    value={formData.description}
+                    onChange={val => setFormData({ ...formData, description: val })}
+                    className="bg-white rounded border border-gray-300"
+                  />
+                </div>
               </div>
 
               <style jsx global>{`
@@ -358,6 +361,19 @@ export default function CreateStoryPage() {
               </div>
 
               <div className="pt-2">
+                  <div className="flex items-center gap-2 cursor-pointer group mb-4">
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 rounded border-gray-300 text-admin-teal focus:ring-admin-teal" 
+                      checked={formData.isAdminPick}
+                      onChange={e => setFormData({ ...formData, isAdminPick: e.target.checked })}
+                    />
+                    <div className="flex flex-col">
+                       <span className="text-xs font-bold text-gray-700">Admin's Top 8 Pick</span>
+                       <span className="text-[10px] text-gray-400 font-medium">Highlight this on the home page</span>
+                    </div>
+                  </div>
+
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${formData.isExclusive ? 'bg-admin-teal border-admin-teal' : 'border-gray-300'}`}>
                     <input
